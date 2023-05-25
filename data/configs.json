@@ -1,0 +1,32 @@
+{
+    "4": {
+        "Leader": 1,
+        "Traitor": 1,
+        "Assassin": 2,
+        "Guardian": 0
+    },
+    "5": {
+        "Leader": 1,
+        "Traitor": 1,
+        "Assassin": 2,
+        "Guardian": 1        
+    },
+    "6": {
+        "Leader": 1,
+        "Traitor": 1,
+        "Assassin": 3,
+        "Guardian": 1
+    },
+    "7": {
+        "Leader": 1,
+        "Traitor": 1,
+        "Assassin": 3,
+        "Guardian": 2        
+    },
+    "8": {
+        "Leader": 1,
+        "Traitor": 2,
+        "Assassin": 3,
+        "Guardian": 2       
+    }
+}
