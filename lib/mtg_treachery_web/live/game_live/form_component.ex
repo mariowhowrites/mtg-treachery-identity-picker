@@ -50,33 +50,32 @@ defmodule MtgTreacheryWeb.GameLive.FormComponent do
   end
 
   def handle_event("save", %{"game" => game_params}, socket) do
-    save_game(socket, socket.assigns.action, game_params)
+    save_game(socket, socket.assigns.action, game_params, socket.assigns.user_uuid)
   end
 
-  defp save_game(socket, :edit, game_params) do
-    case Multiplayer.update_game(socket.assigns.game, game_params) do
+  # defp save_game(socket, :edit, game_params) do
+  #   case Multiplayer.update_game(socket.assigns.game, game_params) do
+  #     {:ok, game} ->
+  #       notify_parent({:saved, game})
+
+  #       {:noreply,
+  #        socket
+  #        |> put_flash(:info, "Game updated successfully")
+  #        |> push_patch(to: socket.assigns.patch)}
+
+  #     {:error, %Ecto.Changeset{} = changeset} ->
+  #       {:noreply, assign_form(socket, changeset)}
+  #   end
+  # end
+
+  defp save_game(socket, :new, game_params, user_uuid) do
+    case Multiplayer.create_game_with_player(game_params, user_uuid) do
       {:ok, game} ->
         notify_parent({:saved, game})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Game updated successfully")
-         |> push_patch(to: socket.assigns.patch)}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
-    end
-  end
-
-  defp save_game(socket, :new, game_params) do
-    case Multiplayer.create_game(game_params) do
-      {:ok, game} ->
-        notify_parent({:saved, game})
-
-        {:noreply,
-         socket
-         |> put_flash(:info, "Game created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> push_navigate(to: ~p"/game")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}

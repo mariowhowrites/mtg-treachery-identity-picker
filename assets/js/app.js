@@ -22,8 +22,18 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+const Hooks = {};
+Hooks.IdentityCardContent = {
+    mounted() {
+        this.el.innerHTML = this.el.innerHTML.toString().replaceAll("{", '<span class="bg-stone-300 rounded-full mx-1 px-2 py-1 text-black">').replaceAll("}", '</span>')
+    },
+    updated() {
+        this.el.innerHTML = this.el.innerHTML.toString().replaceAll("{", '<span class="bg-stone-300 rounded-full mx-1 px-2 py-1 text-black">').replaceAll("}", '</span>')
+    }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}})
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
@@ -39,3 +49,8 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+window.addEventListener("copy_game_code", event => {
+    const text = event.target.value;
+
+    navigator.clipboard.writeText(text)
+})

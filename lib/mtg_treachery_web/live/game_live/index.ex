@@ -5,8 +5,11 @@ defmodule MtgTreacheryWeb.GameLive.Index do
   alias MtgTreachery.Multiplayer.Game
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, stream(socket, :games, Multiplayer.list_games())}
+  def mount(_params, session, socket) do
+    {:ok,
+      stream(socket, :games, Multiplayer.list_games())
+      |> assign(:user_uuid, Map.get(session, "user_uuid"))
+    }
   end
 
   @impl true

@@ -1,9 +1,9 @@
 defmodule MtgTreachery.Airtable.Client do
-  def get_roles do
+  def get_identities do
     res = make_airtable_request()
 
     Map.get(res.body, "records")
-    |> get_fields_from_roles()
+    |> get_fields_from_identities()
   end
 
   defp make_airtable_request do
@@ -18,7 +18,7 @@ defmodule MtgTreachery.Airtable.Client do
     )
   end
 
-  defp get_fields_from_roles(roles) do
-    Enum.map(roles, fn role -> Map.get(role, "fields") end)
+  defp get_fields_from_identities(identities) do
+    Enum.map(identities, fn identity -> Map.get(identity, "fields") end)
   end
 end

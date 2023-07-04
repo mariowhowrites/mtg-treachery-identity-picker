@@ -8,6 +8,17 @@ defmodule MtgTreacheryWeb.Router do
     plug :put_root_layout, {MtgTreacheryWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user_uuid
+  end
+
+  def fetch_current_user_uuid(conn, _) do
+    if user_uuid = get_session(conn, :user_uuid) do
+      assign(conn, :user_uuid, user_uuid)
+    else
+      new_uuid = Ecto.UUID.generate()
+
+      conn |> assign(:user_uuid, new_uuid) |> put_session(:user_uuid, new_uuid)
+    end
   end
 
   pipeline :api do
@@ -19,12 +30,17 @@ defmodule MtgTreacheryWeb.Router do
 
     get "/", PageController, :home
 
-    live "/games", GameLive.Index, :index
-    live "/games/new", GameLive.Index, :new
-    live "/games/:id/edit", GameLive.Index, :edit
+    live "/game", GameLive.Show, :show, container: {:div, class: "h-full"}
+    live "/game/identity", GameLive.Show, :identity, container: {:div, class: "h-full"}
+    live "/game/players", GameLive.Show, :players, container: {:div, class: "h-full"}
+    live "/game/settings", GameLive.Show, :settings, container: {:div, class: "h-full"}
 
-    live "/games/:id", GameLive.Show, :show
-    live "/games/:id/show/edit", GameLive.Show, :edit
+    live "/create", GameLive.Create, :new, container: {:div, class: "min-h-screen"}
+    live "/join", GameLive.Join, :join, container: {:div, class: "min-h-screen"}
+
+    # live "/games", GameLive.Index, :index
+    # live "/games/new", GameLive.Index, :new
+    # live "/games/:id/edit", GameLive.Index, :edit
   end
 
   # Other scopes may use custom stacks.
