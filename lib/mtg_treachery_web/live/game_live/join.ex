@@ -16,7 +16,7 @@ defmodule MtgTreacheryWeb.GameLive.Join do
     """
   end
 
-  def mount(params, session, socket) do
+  def mount(_params, session, socket) do
     user_uuid = Map.get(session, "user_uuid")
 
     {
@@ -37,7 +37,7 @@ defmodule MtgTreacheryWeb.GameLive.Join do
 
   def handle_event("attempt_join", %{"game_code" => game_code}, socket) do
     case Multiplayer.maybe_join_game(%{game_code: game_code, user_uuid: socket.assigns.user_uuid}) do
-      {:ok, _player} -> {:noreply, socket |> push_navigate(to: ~p"/game")}
+      {:ok, _player} -> {:noreply, socket |> push_navigate(to: ~p"/game/players")}
       _ -> {:noreply, socket}
     end
   end

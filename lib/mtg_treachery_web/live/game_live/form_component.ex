@@ -2,6 +2,7 @@ defmodule MtgTreacheryWeb.GameLive.FormComponent do
   use MtgTreacheryWeb, :live_component
 
   alias MtgTreachery.Multiplayer
+  alias MtgTreachery.Multiplayer.Game
 
   @impl true
   def render(assigns) do
@@ -20,7 +21,8 @@ defmodule MtgTreacheryWeb.GameLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:player_count]} type="number" label="Player Count" />
-        <.input field={@form[:rarity]} type="select" label="Rarity" value="uncommon" options={["Uncommon": "uncommon", "Rare": "rare", "Mythic Rare": "mythic"]} />
+        <%!-- <.input field={@form[:rarity]} type="checkbox" label="Rarity" options={["Uncommon": "uncommon", "Rare": "rare", "Mythic Rare": "mythic"]} /> --%>
+        <.checkgroup field={@form[:rarities]} label="Rarities" options={Game.rarity_options()} />
         <:actions>
           <.button phx-disable-with="Saving...">Save Game</.button>
         </:actions>

@@ -49,8 +49,6 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
-window.addEventListener("copy_game_code", event => {
-    const text = event.target.value;
-
-    navigator.clipboard.writeText(text)
+window.addEventListener("phx:copy_game_code", event => {
+    navigator.clipboard.writeText(document.getElementById(event.detail.id).value)
 })

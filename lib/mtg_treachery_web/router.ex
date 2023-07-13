@@ -30,13 +30,16 @@ defmodule MtgTreacheryWeb.Router do
 
     get "/", PageController, :home
 
-    live "/game", GameLive.Show, :show, container: {:div, class: "h-full"}
+
+    live "/game", GameLive.Show, :players, container: {:div, class: "h-full"}
     live "/game/identity", GameLive.Show, :identity, container: {:div, class: "h-full"}
     live "/game/players", GameLive.Show, :players, container: {:div, class: "h-full"}
     live "/game/settings", GameLive.Show, :settings, container: {:div, class: "h-full"}
 
-    live "/create", GameLive.Create, :new, container: {:div, class: "min-h-screen"}
-    live "/join", GameLive.Join, :join, container: {:div, class: "min-h-screen"}
+    live "/create", GameLive.Create, :new, container: {:div, class: "h-full"}
+    live "/join", GameLive.Join, :join, container: {:div, class: "h-full"}
+
+    live "/identities", IdentityLive.Index, :index, container: {:div, class: "h-full"}
 
     # live "/games", GameLive.Index, :index
     # live "/games/new", GameLive.Index, :new

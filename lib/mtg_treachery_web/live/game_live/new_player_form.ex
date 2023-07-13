@@ -1,6 +1,7 @@
 defmodule MtgTreacheryWeb.GameLive.NewPlayerForm do
   use MtgTreacheryWeb, :live_component
 
+  alias MtgTreachery.Multiplayer
 
   def render(assigns) do
     ~H"""

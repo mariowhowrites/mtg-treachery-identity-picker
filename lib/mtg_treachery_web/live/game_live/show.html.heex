@@ -5,59 +5,55 @@
   </button>
   <input type="text" class="hidden" disabled value={@game.game_code} id="game_code_input">
 </header>
-<article class="flex flex-col items-center relative h-full">
-  <%= if @game.status == :waiting do %>
-    <.live_component
-      module={MtgTreacheryWeb.GameLive.Players.Index}
-      game={@game}
-      current_player={@current_player}
-      id={"pregame_lobby_players_index"}
-    />
-
-    <%= if @current_player.creator do %>
-    <section class="flex flex-col items-start gap-y-3 mb-6">
-      <%= if Multiplayer.is_game_full(@game) do %>
-      <button phx-click="start_game" class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg">Start Game</button>
-      <% end %>
-    </section>
-    <% end %>
-
-    <section class="flex flex-col items-start gap-y-3">
-      <button phx-click="add_player" class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg">Add Player</button>
-    </section>
-  <% end %>
-
-  <%= if @game.status == :live do %>
-    <section class="flex flex-col items-center mt-8 gap-y-4">
-      <div class="text-center">
-        <h3 class="text-lg font-semibold"><%= @current_player.name %></h3>
-        <p><%= String.capitalize(Atom.to_string(@current_player.status)) %></p>
-      </div>
-
+<article class="relative h-full">
+  <section class="pt-8 gap-y-4 h-4/5">
+    <div id="panel-content" class="h-4/5">
       <%= case @live_action do %>
         <% :identity -> %>
-        <IdentityCard.show
-          id="identity-card"
-          is_card_flipped={@is_card_flipped}
+        <.live_component 
+          module={IdentityPanel}
+          game={@game}
           current_player={@current_player}
+          id="identity_panel"
         />
         <% :players -> %>
         <.live_component
-          module={MtgTreacheryWeb.GameLive.Players.Index}
+          module={PlayersPanel}
           game={@game}
           current_player={@current_player}
-          id={"pregame_lobby_players_index"}
+          id="players_panel"
         />
         <% :settings -> %>
-        <h2>Settings</h2>
+        <.live_component
+          module={SettingsPanel}
+          id="settings_form"
+          current_player={@current_player}
+        />
+        <button
+          phx-click="leave_game" 
+          class="text-red"
+        >
+          Leave Game
+        </button>
         <% _ -> %>
         <h2>Something Else</h2>
       <% end %>
-    </section>
-    <footer class="absolute bottom-0 left-0 w-full h-1/5 flex justify-evenly">
-      <div><.link patch={~p"/game/identity"}>Identity</.link></div>
-      <div><.link patch={~p"/game/players"}>Players</.link></div>
-      <div><.link patch={~p"/game/settings"}>Settings</.link></div>
-    </footer>
-  <% end %>
+    </div>
+    <div id="current-player-controls" class="text-center h-1/5">
+      <h3 class="text-lg font-semibold"><%= @current_player.name %></h3>
+      <%= if Multiplayer.is_game_full(@game) do %>
+        <button
+          phx-click="start_game"
+          class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+        >
+          Start Game
+        </button>
+      <% end %>
+    </div>
+  </section>
+  <footer class="absolute bottom-0 left-0 w-full h-1/5 flex justify-evenly">
+    <div><.link patch={~p"/game/identity"}>Identity</.link></div>
+    <div><.link patch={~p"/game/players"}>Players</.link></div>
+    <div><.link patch={~p"/game/settings"}>Settings</.link></div>
+  </footer>
 </article>

@@ -1,12 +1,12 @@
 defmodule MtgTreachery.Multiplayer.IdentityPicker do
   @configs_path "data/configs.json"
 
-  def pick_identities(player_count, rarity) do
+  def pick_identities(player_count, rarities) do
     identities = MtgTreachery.Multiplayer.list_identities()
 
     config = get_config(player_count)
 
-    get_identities_for_config(identities, config, rarity)
+    get_identities_for_config(identities, config, rarities)
   end
 
   @doc """
@@ -25,17 +25,17 @@ defmodule MtgTreachery.Multiplayer.IdentityPicker do
   as well as a list of all possible identities and the desired rarity,
   pulls identities from the list of all identities based on the criteria in the config.
   """
-  defp get_identities_for_config(identities, config, rarity) do
+  defp get_identities_for_config(identities, config, rarities) do
     Enum.flat_map(config, fn {role, count} ->
-      all_possible_identities = get_all_possible_identities(identities, role, rarity)
+      all_possible_identities = get_all_possible_identities(identities, role, rarities)
 
       Enum.take_random(all_possible_identities, count)
     end)
   end
 
-  defp get_all_possible_identities(identities, role, rarity) do
+  defp get_all_possible_identities(identities, role, rarities) do
     Enum.filter(identities, fn possible_identity ->
-      possible_identity.role == role and String.to_atom(String.downcase(possible_identity.rarity)) == rarity
+      possible_identity.role == role and Enum.member?(rarities, String.downcase(possible_identity.rarity))
     end)
   end
 end

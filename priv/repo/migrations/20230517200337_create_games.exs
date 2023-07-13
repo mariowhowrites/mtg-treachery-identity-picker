@@ -5,7 +5,7 @@ defmodule MtgTreachery.Repo.Migrations.CreateGames do
     create table(:games) do
       add :game_code, :string
       add :player_count, :integer
-      add :rarity, :string
+      add :rarities, {:array, :string}
       add :status, :string
 
       timestamps()

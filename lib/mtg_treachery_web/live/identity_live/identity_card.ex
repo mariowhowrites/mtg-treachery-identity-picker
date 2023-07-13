@@ -1,4 +1,4 @@
-defmodule MtgTreacheryWeb.GameLive.IdentityCard do
+defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
   use MtgTreacheryWeb, :html
   def show(assigns) do
     ~H"""
@@ -16,6 +16,7 @@ defmodule MtgTreacheryWeb.GameLive.IdentityCard do
         <button
           class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
           phx-click="unveil"
+          phx-target="#identity-panel"
         >
           Unveil
         </button>
@@ -32,13 +33,15 @@ defmodule MtgTreacheryWeb.GameLive.IdentityCard do
             <div>Unveil cost: <%= @current_player.identity.unveil_cost %></div>
             <%!-- <div>Unveil cost: <span class="bg-gray-100 rounded-full px-2 py-1 text-black">4</span></div> --%>
           </section>
-          <p class="mx-4 px-2 rounded-sm mb-4 bg-stone-100">
-            <%= raw @current_player.identity.description %>
-          </p>
+          <div class="mx-4 px-2 rounded-sm mb-4 bg-stone-100 text-sm">
+            <%= for paragraph <- String.split(@current_player.identity.description, "\n") do %>
+              <p class="mt-1"><%= paragraph %></p>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
-    <button class="text-gray-700" phx-click="peek">Peek (look at card without unveiling)</button>
+    <button class="text-gray-700 text-xs" phx-click="peek" phx-target="#identity-panel">Peek (look at card without unveiling)</button>
     """
   end
 

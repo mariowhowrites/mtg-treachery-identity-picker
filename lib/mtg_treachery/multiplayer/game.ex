@@ -11,27 +11,31 @@ defmodule MtgTreachery.Multiplayer.Game do
     field :game_code, :string
     field :player_count, :integer, default: 5
     field :status, Ecto.Enum, values: [:waiting, :live, :inactive], default: :waiting
-    field :rarity, Ecto.Enum, values: [:uncommon, :rare, :mythic]
+    field :rarities, {:array, :string}
     has_many :players, Player
 
     timestamps()
   end
 
+  @rarity_options [
+    {"Uncommon", "uncommon"},
+    {"Rare", "rare"},
+    {"Mythic Rare", "mythic"},
+  ]
+
+  def rarity_options, do: @rarity_options
+
+  @valid_rarities Enum.map(@rarity_options, fn({_text, val}) -> val end)
   @doc false
   def changeset(game, attrs) do
     game
-    |> cast(attrs, [:player_count, :rarity, :status])
-    |> validate_required([:player_count, :rarity, :status])
+    |> cast(attrs, [:player_count, :rarities, :status])
+    |> validate_required([:player_count, :rarities, :status])
     |> validate_number(:player_count, greater_than_or_equal_to: 4, less_than_or_equal_to: 8)
-    # |> uppercase_rarity()
+    |> validate_length(:rarities, min: 1, max: 3)
+    |> validate_subset(:rarities, @valid_rarities)
   end
 
-  # defp uppercase_rarity(game) do
-  #   case Map.has_key?(game, :rarity) do
-  #     true -> put_change(game, :rarity, String.capitalize(fetch_field(game, :rarity)))
-  #     false -> game
-  #   end
-  # end
   def subscribe_game(game_id) do
     PubSub.subscribe(@pubsub, "game:#{game_id}")
   end

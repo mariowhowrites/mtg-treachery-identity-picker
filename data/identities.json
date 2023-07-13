@@ -217,7 +217,7 @@
         "Unveil Cost": "{3}"
     },
     {
-        "Description": "When The TIme Bender is unveiled, choose two --\n\n* Each player shuffles their hand and graveyard into their library, then draws seven cards.\n* Take an extra turn after this one.\n* End the turn.",
+        "Description": "When The Time Bender is unveiled, choose two --\n\n* Each player shuffles their hand and graveyard into their library, then draws seven cards.\n* Take an extra turn after this one.\n* End the turn.",
         "Role": "Traitor",
         "Name": "The Time Bender",
         "Rarity": "Rare",

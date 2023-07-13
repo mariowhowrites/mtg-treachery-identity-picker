@@ -48,6 +48,7 @@ defmodule MtgTreachery.Multiplayer do
         join: p in assoc(g, :players),
         where: p.user_uuid == ^user_uuid,
         where: p.game_id == g.id,
+        where: p.status != :inactive,
         preload: [players: :identity],
         order_by: [desc: :inserted_at],
         limit: 1
@@ -124,6 +125,18 @@ defmodule MtgTreachery.Multiplayer do
         {:ok, player}
       _ -> result
     end
+  end
+
+  def update_player_identity(player, %{"name" => name, "identity_id" => identity_id}) do
+    update_player(player, %{"identity_id" => identity_id, "name" => name})
+  end
+
+  def update_player_identity(player, %{"name" => name}) do
+    update_player(player, %{"name" => name})
+  end
+
+  def change_player(%Player{} = player, attrs \\ %{}) do
+    Player.changeset(player, attrs)
   end
 
   def maybe_broadcast_game({:ok, player}, game) do
@@ -214,7 +227,7 @@ defmodule MtgTreachery.Multiplayer do
   """
   def start_game(game) do
     picked_identities =
-      IdentityPicker.pick_identities(game.player_count, game.rarity)
+      IdentityPicker.pick_identities(game.player_count, game.rarities)
       |> Enum.shuffle()
 
     game.players

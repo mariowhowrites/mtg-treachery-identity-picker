@@ -3,9 +3,6 @@ defmodule MtgTreachery.Multiplayer.Player do
   import Ecto.Changeset
   alias MtgTreachery.Multiplayer.Game
   alias MtgTreachery.Multiplayer.Identity
-  alias Phoenix.PubSub
-
-  @pubsub MtgTreachery.PubSub
 
   schema "players" do
     field :user_uuid, :string
@@ -19,9 +16,15 @@ defmodule MtgTreachery.Multiplayer.Player do
     timestamps()
   end
 
-  def changeset(user, attrs) do
-    user
+  def changeset(player, attrs) do
+    player
     |> cast(attrs, [:user_uuid, :name, :creator, :status])
     |> validate_required([:user_uuid, :name])
+  end
+
+  def settings_changeset(player, attrs) do
+    player
+    |> cast(attrs, [:identity_id, :name])
+    |> validate_required([:name])
   end
 end

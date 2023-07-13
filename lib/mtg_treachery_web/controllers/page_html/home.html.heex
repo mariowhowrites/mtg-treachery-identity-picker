@@ -2,12 +2,20 @@
   <h1 class="text-4xl">MTG Cloak</h1>
   <p>A bot to assist with MTG Treachery games</p>
   <a class="text-blue-400 underline" href="https://mtgtreachery.net/en/">Read more about MTG Treachery</a>
-  <ul>
+  <ul class="flex items-center gap-2">
     <li>
-      <.link href={~p"/create"}>Create</.link>
+      <.link href={~p"/create"}>
+        <.button>
+          Create
+        </.button>
+      </.link>
     </li>
     <li>
-      <.link href={~p"/join"}>Join</.link>
+      <.link href={~p"/join"}>
+        <.button>
+          Join
+        </.button>
+      </.link>
     </li>
   </ul>
 </div>

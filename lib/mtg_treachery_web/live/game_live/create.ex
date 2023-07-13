@@ -7,7 +7,7 @@ defmodule MtgTreacheryWeb.GameLive.Create do
     {
       :ok,
       assign(socket, :user_uuid, Map.get(session, "user_uuid"))
-      |> assign(:game, %Game{})
+      |> assign(:game, %Game{rarities: ["uncommon"]})
       |> assign(:page_title, "Create a game")
     }
   end
