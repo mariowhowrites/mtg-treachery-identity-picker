@@ -16,10 +16,17 @@ defmodule MtgTreachery.Application do
       {Phoenix.PubSub, name: MtgTreachery.PubSub},
       # Start Finch
       {Finch, name: MtgTreachery.Finch},
+      # Start life server cache
+      MtgTreachery.LifeTotals.Cache,
+      # Start life server process registry
+      MtgTreachery.LifeTotals.ProcessRegistry,
+      # Attach life total servers to any existing games
+      MtgTreachery.Tasks.LifeServerSetup,
       # Start the Endpoint (http/https)
       MtgTreacheryWeb.Endpoint
       # Start a worker by calling: MtgTreachery.Worker.start_link(arg)
       # {MtgTreachery.Worker, arg}
+
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

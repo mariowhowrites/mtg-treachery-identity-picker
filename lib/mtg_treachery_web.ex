@@ -85,6 +85,7 @@ defmodule MtgTreacheryWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import MtgTreacheryWeb.CoreComponents
+      import MtgTreacheryWeb.ViewComponents
       import MtgTreacheryWeb.Gettext
 
       # Shortcut for generating JS commands

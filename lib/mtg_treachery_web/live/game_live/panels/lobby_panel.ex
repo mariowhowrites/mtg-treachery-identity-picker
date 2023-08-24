@@ -1,4 +1,4 @@
-defmodule MtgTreacheryWeb.GameLive.Panels.PlayersPanel do
+defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
   use MtgTreacheryWeb, :live_component
 
   alias MtgTreachery.Multiplayer
@@ -10,6 +10,8 @@ defmodule MtgTreacheryWeb.GameLive.Panels.PlayersPanel do
 
   @impl true
   def render(assigns) do
+    IO.inspect(assigns.life_totals)
+
     ~H"""
     <div class="h-full">
       <section class="h-full w-4/5 mx-auto py-6 flex flex-col items-center gap-2 w-full">
@@ -17,40 +19,34 @@ defmodule MtgTreacheryWeb.GameLive.Panels.PlayersPanel do
         <ul class="w-full grid grid-cols-2 grid-rows-2 h-full justify-end">
           <%= for {player, index} <- other_players(@game, @current_player) do %>
             <li class={other_player_card_wrapper_style(player, index, @game)}>
-              <div class="text-center">
-                <%= player.name %>
+              <div class="text-center h-full flex flex-col items-center justify-center">
+                <span><%= player.name %></span>
+                <%= if player.identity != nil do %>
+                  <span><%= player.status %></span>
+                  <%!-- test button, remove for prod --%>
+                  <button phx-click="unveil_player" phx-value-player={player.id}>Toggle Veil</button>
+                <% end %>
+                <%= if player.identity != nil and player.status != :veiled do %>
+                  <button phx-click="view_player" class="underline text-blue-600" phx-value-player-id={player.id}>
+                    <%= player.identity.role %> - <%= player.identity.name %>
+                  </button>
+                <% end %>
+                <span><%= @life_totals[player.id] %></span>
               </div>
             </li>
           <% end %>
           <%= for _empty_slot <- empty_slots(@game) do %>
-            <li class="w-1/2 h-20 border-2 text-center bg-gray-100 flex justify-center items-center">Empty slot</li>
+            <li class="border-2 text-center bg-gray-100 flex justify-center items-center">
+              Empty slot
+            </li>
           <% end %>
         </ul>
       </section>
-
-      <%!-- controls -- this should move to settings page --%>
-      <%= if @current_player.creator do %>
-        <section class="flex flex-col items-start gap-y-3 mb-6">
-          <button
-            phx-click="add_player"
-            phx-target={@myself}
-            class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
-          >
-            Add Player
-          </button>
-        </section>
-      <% end %>
     </div>
     """
   end
 
   @impl true
-  def handle_event("add_player", _params, socket) do
-    Multiplayer.maybe_create_player(%{user_uuid: Ecto.UUID.generate()}, socket.assigns.game)
-
-    {:noreply, socket}
-  end
-
   def handle_event("start_editing", _params, socket) do
     {:noreply, socket |> push_patch(to: ~p"/game/settings")}
   end
@@ -69,10 +65,11 @@ defmodule MtgTreacheryWeb.GameLive.Panels.PlayersPanel do
   defp other_players(game, current_player) do
     game.players
     |> Enum.filter(fn player -> player.id != current_player.id end)
+    |> Enum.sort()
     |> Enum.with_index()
   end
 
-  defp other_player_card_wrapper_style(player, index, game) do
+  defp other_player_card_wrapper_style(_player, _index, _game) do
     "border-2"
   end
 end

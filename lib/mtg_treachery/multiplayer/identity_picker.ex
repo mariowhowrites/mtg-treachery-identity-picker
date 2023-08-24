@@ -1,5 +1,4 @@
 defmodule MtgTreachery.Multiplayer.IdentityPicker do
-  @configs_path "data/configs.json"
 
   def pick_identities(player_count, rarities) do
     identities = MtgTreachery.Multiplayer.list_identities()
@@ -15,7 +14,9 @@ defmodule MtgTreachery.Multiplayer.IdentityPicker do
   and :number is the number of that role that should be in the game.
   """
   defp get_config(player_count) do
-    all_configs = Jason.decode!(File.read!(@configs_path))
+    all_configs = Jason.decode!(
+      File.read!(Application.app_dir(:mtg_treachery, "priv/configs/role-distributions.json"))
+      )
 
     Map.get(all_configs, Integer.to_string(player_count))
   end

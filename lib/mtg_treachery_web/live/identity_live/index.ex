@@ -15,14 +15,9 @@ defmodule MtgTreacheryWeb.IdentityLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <section class="flex flex-col gap-12" phx-hook="IdentityCardContent" id="identity-index">
+    <section class="flex flex-col gap-12" id="identity-index">
       <%= for identity <- @identities do %>
-        <article>
-          <h2 class="text-lg font-semibold"><%= identity.name %></h2>
-          <%= for paragraph <- String.split(identity.description, "\n") do %>
-            <p class="mt-4"><%= paragraph %></p>
-          <% end %>
-        </article>
+        <.identity_component identity={identity} />
       <% end %>
     </section>
     """

@@ -18,17 +18,13 @@ defmodule MtgTreachery.Multiplayer.Identity do
 
   def all() do
     raw_identities =
-      case File.exists?(@identities_path) do
-        true -> Jason.decode!(File.read!(@identities_path))
+      case File.exists?(Application.app_dir(:mtg_treachery, "priv/configs/identities.json")) do
+        true -> Jason.decode!(File.read!(Application.app_dir(:mtg_treachery, "priv/configs/identities.json")))
         false -> fetch_identities()
       end
 
     convert_raw_identities(raw_identities)
   end
-
-  # def get_by_name(name) do
-  #   all_identities
-  # end
 
   defp fetch_identities() do
     identities = Client.get_identities()
@@ -50,5 +46,9 @@ defmodule MtgTreachery.Multiplayer.Identity do
         }
       end
     end)
+  end
+
+  def slug(identity) do
+    identity.name |> String.downcase() |> String.replace(" ", "_")
   end
 end

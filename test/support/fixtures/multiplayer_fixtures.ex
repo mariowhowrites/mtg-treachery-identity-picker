@@ -1,4 +1,6 @@
 defmodule MtgTreachery.MultiplayerFixtures do
+  alias MtgTreachery.Repo
+
   @moduledoc """
   This module defines test helpers for creating
   entities via the `MtgTreachery.Multiplayer` context.
@@ -11,10 +13,12 @@ defmodule MtgTreachery.MultiplayerFixtures do
     {:ok, game} =
       attrs
       |> Enum.into(%{
-        code: "some code"
+        player_count: 5,
+        rarities: ["uncommon"],
+        status: :waiting
       })
       |> MtgTreachery.Multiplayer.create_game()
 
-    game
+    game |> Repo.preload(:players)
   end
 end

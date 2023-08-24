@@ -18,6 +18,12 @@ module.exports = {
       }
     },
   },
+  variants: {
+    extend: {
+      backgroundColor: ['active'],
+      shadow: ['active']
+    }
+  },
   plugins: [
     require("@tailwindcss/forms"),
     // Allows prefixing tailwind classes with LiveView classes to add rules

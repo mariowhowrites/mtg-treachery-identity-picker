@@ -43,4 +43,16 @@ defmodule MtgTreachery.Multiplayer.Game do
   def broadcast_game(game_id) do
     PubSub.broadcast(@pubsub, "game:#{game_id}", {:game, game_id})
   end
+
+  def broadcast_game_start(game_id) do
+    PubSub.broadcast(@pubsub, "game:#{game_id}", {:game_start})
+  end
+
+  def subscribe_life_totals(game_id) do
+    PubSub.subscribe(@pubsub, "life_totals:#{game_id}")
+  end
+
+  def broadcast_life_totals(game_id, life_totals) do
+    PubSub.broadcast(@pubsub, "life_totals:#{game_id}", {:life_totals, life_totals})
+  end
 end

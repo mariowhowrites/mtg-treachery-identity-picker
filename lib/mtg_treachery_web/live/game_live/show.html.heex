@@ -16,32 +16,40 @@
           current_player={@current_player}
           id="identity_panel"
         />
-        <% :players -> %>
+        <% :lobby -> %>
         <.live_component
-          module={PlayersPanel}
+          module={LobbyPanel}
           game={@game}
           current_player={@current_player}
-          id="players_panel"
+          life_totals={@life_totals}
+          id="lobby_panel"
         />
         <% :settings -> %>
         <.live_component
           module={SettingsPanel}
-          id="settings_form"
+          game={@game}
           current_player={@current_player}
+          id="settings_form"
         />
-        <button
-          phx-click="leave_game" 
-          class="text-red"
-        >
-          Leave Game
-        </button>
+        <% :player -> %>
+        <.live_component
+          module={PlayerPanel}
+          player={if Map.has_key?(assigns, :selected_player), do: @selected_player, else: nil}
+          id="player_panel"
+        />
         <% _ -> %>
         <h2>Something Else</h2>
       <% end %>
     </div>
-    <div id="current-player-controls" class="text-center h-1/5">
+    <div id="current-player-controls" class="text-center h-1/5 relative">
       <h3 class="text-lg font-semibold"><%= @current_player.name %></h3>
-      <%= if Multiplayer.is_game_full(@game) do %>
+      <%= if @game.status != :waiting do %>
+        <div><%= @current_player.status %></div>
+        <%= if @current_player.identity != nil and @current_player.status != :veiled do %>
+          <div><%= @current_player.identity.role %> - <%= @current_player.identity.name %></div>
+        <% end %>
+      <% end %>
+      <%= if should_show_start_game_button(@game, @current_player) do %>
         <button
           phx-click="start_game"
           class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
@@ -49,11 +57,30 @@
           Start Game
         </button>
       <% end %>
+      <%= if should_show_life_controls(@game, @current_player) do %>
+      <div class="flex justify-center items-center gap-x-4">
+        <button
+          phx-click="gain_life"
+          class="px-4 py-3 rounded-full bg-green-400 hover:bg-green-500 active:bg-green-600 shadow-sm hover:shadow active:shadow-lg text-white font-semibold"
+          phx-value-player-id={@current_player.id}
+        >
+        +
+        </button>
+        <span class="text-xl font-bold"><%= @life_totals[@current_player.id] %></span>
+        <button
+          phx-click="lose_life"
+          class="px-4 py-3 rounded-full bg-red-400 hover:bg-red-500 active:bg-red-600 shadow-sm hover:shadow active:shadow-lg text-white font-semibold"
+          phx-value-player-id={@current_player.id}
+        >
+        -
+        </button>
+      </div>
+      <% end %>
     </div>
   </section>
   <footer class="absolute bottom-0 left-0 w-full h-1/5 flex justify-evenly">
     <div><.link patch={~p"/game/identity"}>Identity</.link></div>
-    <div><.link patch={~p"/game/players"}>Players</.link></div>
+    <div><.link patch={~p"/game/lobby"}>Lobby</.link></div>
     <div><.link patch={~p"/game/settings"}>Settings</.link></div>
   </footer>
 </article>

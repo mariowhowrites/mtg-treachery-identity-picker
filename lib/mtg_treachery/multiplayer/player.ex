@@ -9,6 +9,7 @@ defmodule MtgTreachery.Multiplayer.Player do
     field :name, :string, default: "New Player"
     field :creator, :boolean, default: false
     field :status, Ecto.Enum, values: [:veiled, :unveiled, :inactive], default: :veiled
+    field :life, :integer, default: 40
 
     belongs_to :game, Game
     belongs_to :identity, Identity

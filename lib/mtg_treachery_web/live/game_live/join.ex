@@ -37,7 +37,7 @@ defmodule MtgTreacheryWeb.GameLive.Join do
 
   def handle_event("attempt_join", %{"game_code" => game_code}, socket) do
     case Multiplayer.maybe_join_game(%{game_code: game_code, user_uuid: socket.assigns.user_uuid}) do
-      {:ok, _player} -> {:noreply, socket |> push_navigate(to: ~p"/game/players")}
+      {:ok, _player} -> {:noreply, socket |> push_navigate(to: ~p"/game/lobby")}
       _ -> {:noreply, socket}
     end
   end

@@ -4,16 +4,16 @@ defmodule MtgTreachery.Multiplayer do
   """
 
   import Ecto.Query, warn: false
-  alias MtgTreachery.Multiplayer.IdentityPicker
   alias Ecto.Changeset
   alias MtgTreachery.Repo
 
-  alias MtgTreachery.Multiplayer.Game
-  alias MtgTreachery.Multiplayer.Player
-  alias MtgTreachery.Multiplayer.Identity
+  alias MtgTreachery.Multiplayer.{Game,Player,Identity,IdentityPicker}
+  alias MtgTreachery.LifeTotals.{Cache,Server}
 
   @doc """
   Returns the list of games.
+
+  Note: Not used anywhere atm, full list of games is not relevant data for anyone
 
   ## Examples
 
@@ -22,7 +22,7 @@ defmodule MtgTreachery.Multiplayer do
 
   """
   def list_games do
-    Repo.all(Game)
+    Repo.all(Game, preload: [players: :identity])
   end
 
   @doc """
@@ -87,9 +87,14 @@ defmodule MtgTreachery.Multiplayer do
     all_codes = get_all_game_codes()
     game_code = generate_unique_game_code(all_codes)
 
-    %Game{game_code: game_code}
+    {:ok, game} = %Game{game_code: game_code}
     |> Game.changeset(attrs)
     |> Repo.insert()
+
+    # start life total server for this game
+    Cache.server_process(game.id)
+
+    {:ok, game}
   end
 
   def create_game_with_player(game_params, user_uuid) do
@@ -111,7 +116,7 @@ defmodule MtgTreachery.Multiplayer do
     |> Player.changeset(player_params)
     |> Changeset.put_assoc(:game, game)
     |> Repo.insert()
-    |> maybe_broadcast_game(game)
+    |> maybe_broadcast_new_player(game)
   end
 
   def update_player(%Player{} = player, attrs) do
@@ -139,14 +144,26 @@ defmodule MtgTreachery.Multiplayer do
     Player.changeset(player, attrs)
   end
 
-  def maybe_broadcast_game({:ok, player}, game) do
+  def get_player_by_id!(id), do: Repo.get!(Player, id) |> Repo.preload([:identity])
+
+  def maybe_broadcast_new_player({:ok, player}, game) do
     Game.broadcast_game(game.id)
+
+    life_total_server = Cache.server_process(game.id)
+    Server.add_player(life_total_server, player.id)
 
     {:ok, player}
   end
 
-  def maybe_broadcast_game({:error, changeset}, _game) do
+  def maybe_broadcast_new_player({:error, changeset}, _game) do
     {:error, changeset}
+  end
+
+  def get_players_by_game_id(game_id) do
+    Repo.all(
+      from p in Player,
+      where: p.game_id == ^game_id
+    )
   end
 
   @doc """
@@ -226,6 +243,8 @@ defmodule MtgTreachery.Multiplayer do
   although we can also infer these things from the presence or absence of identities.
   """
   def start_game(game) do
+    IO.inspect("starting game")
+
     picked_identities =
       IdentityPicker.pick_identities(game.player_count, game.rarities)
       |> Enum.shuffle()
@@ -237,6 +256,7 @@ defmodule MtgTreachery.Multiplayer do
     case update_game(game, %{status: :live}) do
       {:ok, _updated_game} ->
         Game.broadcast_game(game.id)
+        Game.broadcast_game_start(game.id)
       {:error, changeset} -> {:error, changeset}
     end
   end
@@ -247,9 +267,17 @@ defmodule MtgTreachery.Multiplayer do
 
   def assign_player_identity(player, identity) do
     player
-    |> Player.changeset(%{})
+    |> Player.changeset(make_player_attrs(player, identity))
     |> Changeset.put_assoc(:identity, identity)
     |> Repo.update()
+  end
+
+  defp make_player_attrs(_player, identity) when identity.role == "Leader" do
+    %{status: :unveiled}
+  end
+
+  defp make_player_attrs(_player, _identity) do
+    %{}
   end
 
   def maybe_join_game(%{game_code: game_code, user_uuid: user_uuid}) do
@@ -258,6 +286,22 @@ defmodule MtgTreachery.Multiplayer do
     case possible_game do
       nil -> {:error, :invalid_game_code}
       game -> create_player(%{user_uuid: user_uuid}, game)
+    end
+  end
+
+  def leave_game(player) do
+    update_player(player, %{status: :inactive})
+
+    # if all players are now inactive, mark game as inactive
+    all_active_players = get_players_by_game_id(player.game_id)
+    |> Enum.filter(&(&1.status !== :inactive))
+
+    IO.puts("game should be inactive")
+    IO.puts(player.game)
+    IO.puts(all_active_players)
+
+    if Enum.empty?(all_active_players) do
+      update_game(player.game, %{status: :inactive})
     end
   end
 end
