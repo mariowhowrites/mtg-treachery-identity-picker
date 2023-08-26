@@ -16,7 +16,7 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
     <div class="h-full">
       <section class="h-full w-4/5 mx-auto py-6 flex flex-col items-center gap-2 w-full">
         <h3 class="hidden">Other Players</h3>
-        <ul class="w-full grid grid-cols-2 grid-rows-2 h-full justify-end">
+        <ul class={grid_wrapper_classes(@game)}>
           <%= for {player, index} <- other_players(@game, @current_player) do %>
             <li class={other_player_card_wrapper_style(player, index, @game)}>
               <div class="text-center h-full flex flex-col items-center justify-center">
@@ -71,5 +71,15 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
 
   defp other_player_card_wrapper_style(_player, _index, _game) do
     "border-2"
+  end
+
+  defp grid_wrapper_classes(game) do
+    "w-full grid grid-cols-2 grid-rows-#{grid_rows_num(game.player_count)} h-full justify-end"
+  end
+
+  defp grid_rows_num(player_count) do
+    player_count / 2
+    |> Float.floor()
+    |> trunc()
   end
 end
