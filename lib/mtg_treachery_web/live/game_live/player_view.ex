@@ -82,6 +82,7 @@ defmodule MtgTreacheryWeb.GameLive.PlayerView do
     end
   end
 
+  @impl true
   def handle_info({:game, game_id}, socket) do
     game = Multiplayer.get_game!(game_id)
     player = get_current_player_from_game(game, socket.assigns.selected_player.user_uuid)

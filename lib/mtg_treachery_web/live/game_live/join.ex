@@ -22,7 +22,7 @@ defmodule MtgTreacheryWeb.GameLive.Join do
     {
       :ok,
       socket
-      |> assign(:form, to_form(%{game_code: ""}))
+      |> assign(:form, to_form(%{"game_code" => ""}))
       |> assign(:user_uuid, user_uuid)
     }
   end
