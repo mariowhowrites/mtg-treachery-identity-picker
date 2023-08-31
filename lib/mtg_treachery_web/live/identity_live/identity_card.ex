@@ -13,6 +13,7 @@ defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
         class="absolute top-0 left-0 h-full w-full flex items-center justify-center"
         style="transform: rotateY(0deg); backface-visibility: hidden;"
       >
+
         <button
           class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
           phx-click="unveil"
@@ -28,20 +29,22 @@ defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
       >
         <div id="identity-card-content" class="h-full flex flex-col items-center justify-between">
           <section class="text-center mt-4">
-            <h3 class="text-lg font-semibold"><%= @current_player.identity.name %></h3>
-            <div><%= @current_player.identity.role %></div>
-            <div>Unveil cost: <%= @current_player.identity.unveil_cost %></div>
+            <h3 class="text-lg font-semibold"><%= @selected_player.identity.name %></h3>
+            <div><%= @selected_player.identity.role %></div>
+            <div>Unveil cost: <%= @selected_player.identity.unveil_cost %></div>
             <%!-- <div>Unveil cost: <span class="bg-gray-100 rounded-full px-2 py-1 text-black">4</span></div> --%>
           </section>
           <div class="mx-4 px-2 rounded-sm mb-4 bg-stone-100 text-sm">
-            <%= for paragraph <- String.split(@current_player.identity.description, "\n") do %>
+            <%= for paragraph <- String.split(@selected_player.identity.description, "\n") do %>
               <p class="mt-1"><%= paragraph %></p>
             <% end %>
           </div>
         </div>
       </div>
     </div>
+    <%= if @selected_player.id == @current_player.id do %>
     <button class="text-gray-700 text-xs" phx-click="peek" phx-target="#identity-panel">Peek (look at card without unveiling)</button>
+    <% end %>
     """
   end
 

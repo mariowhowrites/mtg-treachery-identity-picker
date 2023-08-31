@@ -37,6 +37,8 @@ defmodule MtgTreacheryWeb.Router do
     live "/game/settings", GameLive.Show, :settings, container: {:div, class: "h-full"}
     live "/game/player", GameLive.Show, :player, container: {:div, class: "h-full"}
 
+    live "/player/:id", GameLive.PlayerView, :player, container: {:dive, class: "h-full"}
+
 
     live "/create", GameLive.Create, :new, container: {:div, class: "h-full"}
 

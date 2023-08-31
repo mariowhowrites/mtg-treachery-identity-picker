@@ -144,7 +144,7 @@ defmodule MtgTreachery.Multiplayer do
     Player.changeset(player, attrs)
   end
 
-  def get_player_by_id!(id), do: Repo.get!(Player, id) |> Repo.preload([:identity])
+  def get_player_by_id!(id), do: Repo.get!(Player, id) |> Repo.preload([:identity, game: [:players]])
 
   def maybe_broadcast_new_player({:ok, player}, game) do
     Game.broadcast_game(game.id)
@@ -243,8 +243,6 @@ defmodule MtgTreachery.Multiplayer do
   although we can also infer these things from the presence or absence of identities.
   """
   def start_game(game) do
-    IO.inspect("starting game")
-
     picked_identities =
       IdentityPicker.pick_identities(game.player_count, game.rarities)
       |> Enum.shuffle()
@@ -295,10 +293,6 @@ defmodule MtgTreachery.Multiplayer do
     # if all players are now inactive, mark game as inactive
     all_active_players = get_players_by_game_id(player.game_id)
     |> Enum.filter(&(&1.status !== :inactive))
-
-    IO.puts("game should be inactive")
-    IO.puts(player.game)
-    IO.puts(all_active_players)
 
     if Enum.empty?(all_active_players) do
       update_game(player.game, %{status: :inactive})

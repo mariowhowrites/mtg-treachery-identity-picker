@@ -28,4 +28,10 @@ defmodule MtgTreachery.Multiplayer.Player do
     |> cast(attrs, [:identity_id, :name])
     |> validate_required([:name])
   end
+
+  def name_changeset(player, attrs) do
+    player
+    |> cast(attrs, [:name])
+    |> validate_required(:name)
+  end
 end

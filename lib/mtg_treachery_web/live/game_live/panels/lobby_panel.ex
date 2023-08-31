@@ -4,17 +4,10 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
   alias MtgTreachery.Multiplayer
 
   @impl true
-  def mount(socket) do
-    {:ok, socket |> assign(:is_editing_name, false)}
-  end
-
-  @impl true
   def render(assigns) do
-    IO.inspect(assigns.life_totals)
-
     ~H"""
     <div class="h-full">
-      <section class="h-full w-4/5 mx-auto py-6 flex flex-col items-center gap-2 w-full">
+      <section class="h-full w-4/5 mx-auto md:py-6 flex flex-col items-center gap-2 w-full">
         <h3 class="hidden">Other Players</h3>
         <ul class={grid_wrapper_classes(@game)}>
           <%= for {player, index} <- other_players(@game, @current_player) do %>
@@ -24,19 +17,25 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
                 <%= if player.identity != nil do %>
                   <span><%= player.status %></span>
                   <%!-- test button, remove for prod --%>
-                  <button phx-click="unveil_player" phx-value-player={player.id}>Toggle Veil</button>
+                  <%!-- <button phx-click="unveil_player" phx-value-player={player.id}>Toggle Veil</button> --%>
                 <% end %>
                 <%= if player.identity != nil and player.status != :veiled do %>
-                  <button phx-click="view_player" class="underline text-blue-600" phx-value-player-id={player.id}>
+                  <button
+                    phx-click="view_player"
+                    class="underline text-blue-600"
+                    phx-value-player-id={player.id}
+                  >
                     <%= player.identity.role %> - <%= player.identity.name %>
                   </button>
                 <% end %>
-                <span><%= @life_totals[player.id] %></span>
+                <%!-- <%= if @game.status != :waiting do %>
+                  <span><%= @life_totals[player.id] %></span>
+                <% end %> --%>
               </div>
             </li>
           <% end %>
           <%= for _empty_slot <- empty_slots(@game) do %>
-            <li class="border-2 text-center bg-gray-100 flex justify-center items-center">
+            <li class="text-center bg-gray-100 mr-1 mb-1 flex justify-center items-center">
               Empty slot
             </li>
           <% end %>
@@ -69,8 +68,12 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
     |> Enum.with_index()
   end
 
-  defp other_player_card_wrapper_style(_player, _index, _game) do
-    "border-2"
+  defp other_slots(game) do
+    List.duplicate(nil, game.player_count - 1)
+  end
+
+  defp other_player_card_wrapper_style(player, index, game) do
+    ""
   end
 
   defp grid_wrapper_classes(game) do
@@ -78,7 +81,7 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
   end
 
   defp grid_rows_num(player_count) do
-    player_count / 2
+    (player_count / 2)
     |> Float.floor()
     |> trunc()
   end

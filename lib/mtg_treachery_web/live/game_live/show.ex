@@ -9,6 +9,15 @@ defmodule MtgTreacheryWeb.GameLive.Show do
   def mount(_params, session, socket) do
     user_uuid = Map.get(session, "user_uuid")
     game = Multiplayer.get_game_by_user_uuid(user_uuid)
+
+    if game == nil do
+      {:ok, socket |> push_navigate(to: ~p"/")}
+    else
+      mount_with_game(user_uuid, game, socket)
+    end
+  end
+
+  defp mount_with_game(user_uuid, game, socket) do
     player = get_current_player_from_game(game, user_uuid)
     life_totals = %{}
 
@@ -63,7 +72,7 @@ defmodule MtgTreacheryWeb.GameLive.Show do
     case(socket.assigns.current_player.creator) do
       true ->
         Multiplayer.start_game(socket.assigns.game)
-        {:noreply, socket |> push_patch(to: ~p"/game/identity")}
+        {:noreply, socket |> push_navigate(to: ~p"/player/#{socket.assigns.current_player.id}")}
 
       false ->
         {:noreply, socket}
@@ -74,8 +83,7 @@ defmodule MtgTreacheryWeb.GameLive.Show do
     {
       :noreply,
       socket
-      |> assign(:selected_player, Multiplayer.get_player_by_id!(player_id))
-      |> push_patch(to: ~p"/game/player")
+      |> push_navigate(to: ~p"/player/#{player_id}")
     }
   end
 
@@ -144,7 +152,6 @@ defmodule MtgTreacheryWeb.GameLive.Show do
   end
 
   def should_show_life_controls(game, _current_player) do
-    IO.inspect(game.status)
     game.status == :live
   end
 end

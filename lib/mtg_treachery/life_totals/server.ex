@@ -6,7 +6,6 @@ defmodule MtgTreachery.LifeTotals.Server do
 
   # CLIENT FNS
   def start_link({game_id, players}) do
-    IO.inspect("starting life totals server #{game_id}")
     GenServer.start_link(__MODULE__, {game_id, players}, name: via_tuple(game_id))
   end
 
@@ -55,18 +54,12 @@ defmodule MtgTreachery.LifeTotals.Server do
   end
 
   def handle_cast({:gain_life, player_id}, {game_id, life_totals}) do
-    IO.inspect(game_id)
-    IO.inspect(life_totals)
-    IO.inspect(player_id)
-
     new_life_totals =
       Map.put(
         life_totals,
         String.to_integer(player_id),
         Map.get(life_totals, String.to_integer(player_id)) + 1
       )
-
-    IO.inspect(new_life_totals)
 
     Game.broadcast_life_totals(game_id, new_life_totals)
 

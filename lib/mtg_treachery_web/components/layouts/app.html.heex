@@ -1,15 +1,17 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        MTG Cloak -- MTG Treachery Helper
-      </a>
+<div class="flex flex-col h-full">
+  <header class="px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
+      <div class="flex items-center gap-4">
+        <a href="/">
+          MTG Cloak -- MTG Treachery Helper
+        </a>
+      </div>
     </div>
-  </div>
-</header>
-<main class="px-4 py-6 md:py-20 sm:px-6 lg:px-8 h-full">
-  <div class="mx-auto max-w-2xl h-full">
-    <.flash_group flash={@flash} />
-    <%= @inner_content %>
-  </div>
-</main>
+  </header>
+  <main class="md:py-20 md:px-6 lg:px-8 flex-grow">
+    <div class="md:mx-auto md:max-w-2xl h-full flex flex-col">
+      <.flash_group flash={@flash} />
+      <%= @inner_content %>
+    </div>
+  </main>
+</div>

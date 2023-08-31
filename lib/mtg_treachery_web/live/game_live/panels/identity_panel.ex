@@ -17,7 +17,6 @@ defmodule MtgTreacheryWeb.GameLive.Panels.IdentityPanel do
   end
 
   def mount(socket) do
-    IO.inspect("mounting")
     {:ok, socket |> assign(:is_card_flipped, false) |> assign(:is_peeking, false)}
   end
 
@@ -47,13 +46,9 @@ defmodule MtgTreacheryWeb.GameLive.Panels.IdentityPanel do
     assign(socket, :is_card_flipped, !socket.assigns.is_card_flipped)
   end
 
-  @doc """
-  the possible scenarios we know of here are:
-
-  assigns has current_user and current_user is peeking
-
-  """
   defp determine_flip_status(assigns) do
+    IO.inspect(assigns)
+
     case Map.has_key?(assigns, :is_peeking) do
       true -> assigns.is_peeking
       false -> assigns.current_player.status == :unveiled
