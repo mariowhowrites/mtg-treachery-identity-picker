@@ -7,8 +7,8 @@ defmodule MtgTreachery.Multiplayer do
   alias Ecto.Changeset
   alias MtgTreachery.Repo
 
-  alias MtgTreachery.Multiplayer.{Game,Player,Identity,IdentityPicker}
-  alias MtgTreachery.LifeTotals.{Cache,Server}
+  alias MtgTreachery.Multiplayer.{Game, Player, Identity, IdentityPicker}
+  alias MtgTreachery.LifeTotals.{Cache, Server}
 
   @doc """
   Returns the list of games.
@@ -39,7 +39,7 @@ defmodule MtgTreachery.Multiplayer do
       ** (Ecto.NoResultsError)
 
   """
-  def get_game!(id), do: Repo.get!(Game, id) |> Repo.preload([players: [:identity]])
+  def get_game!(id), do: Repo.get!(Game, id) |> Repo.preload(players: [:identity])
 
   # return the most recent game that inclues the user_uuid amongst players
   def get_game_by_user_uuid(user_uuid) do
@@ -60,10 +60,11 @@ defmodule MtgTreachery.Multiplayer do
   end
 
   def get_game_by_game_id(game_id) do
-    Repo.one(from g in Game,
-      where: g.id == ^game_id,
-      join: players in assoc(g, :players),
-      preload: [players: {players, :identity}]
+    Repo.one(
+      from g in Game,
+        where: g.id == ^game_id,
+        join: players in assoc(g, :players),
+        preload: [players: {players, :identity}]
     )
   end
 
@@ -76,7 +77,7 @@ defmodule MtgTreachery.Multiplayer do
         preload: :identity
       )
 
-     Repo.one(player_query)
+    Repo.one(player_query)
   end
 
   def is_game_full(game) do
@@ -87,9 +88,10 @@ defmodule MtgTreachery.Multiplayer do
     all_codes = get_all_game_codes()
     game_code = generate_unique_game_code(all_codes)
 
-    {:ok, game} = %Game{game_code: game_code}
-    |> Game.changeset(attrs)
-    |> Repo.insert()
+    {:ok, game} =
+      %Game{game_code: game_code}
+      |> Game.changeset(attrs)
+      |> Repo.insert()
 
     # start life total server for this game
     Cache.server_process(game.id)
@@ -120,15 +122,18 @@ defmodule MtgTreachery.Multiplayer do
   end
 
   def update_player(%Player{} = player, attrs) do
-    result = player
-    |> Player.changeset(attrs)
-    |> Repo.update()
+    result =
+      player
+      |> Player.changeset(attrs)
+      |> Repo.update()
 
     case result do
       {:ok, player} ->
         Game.broadcast_game(player.game_id)
         {:ok, player}
-      _ -> result
+
+      _ ->
+        result
     end
   end
 
@@ -144,7 +149,8 @@ defmodule MtgTreachery.Multiplayer do
     Player.changeset(player, attrs)
   end
 
-  def get_player_by_id!(id), do: Repo.get!(Player, id) |> Repo.preload([:identity, game: [:players]])
+  def get_player_by_id!(id),
+    do: Repo.get!(Player, id) |> Repo.preload([:identity, game: [:players]])
 
   def maybe_broadcast_new_player({:ok, player}, game) do
     Game.broadcast_game(game.id)
@@ -162,7 +168,7 @@ defmodule MtgTreachery.Multiplayer do
   def get_players_by_game_id(game_id) do
     Repo.all(
       from p in Player,
-      where: p.game_id == ^game_id
+        where: p.game_id == ^game_id
     )
   end
 
@@ -223,11 +229,12 @@ defmodule MtgTreachery.Multiplayer do
   end
 
   def generate_unique_game_code(all_codes) do
-    potential_code = for _ <- 1..6, into: "", do: <<Enum.random('0123456789ABCEFG')>>
+    potential_code = for _ <- 1..6, into: "", do: <<Enum.random(~c"0123456789ABCEFG")>>
 
-    is_duplicate_code = Enum.any?(all_codes, fn existing_code ->
-      Enum.member?(Tuple.to_list(existing_code), potential_code)
-    end)
+    is_duplicate_code =
+      Enum.any?(all_codes, fn existing_code ->
+        Enum.member?(Tuple.to_list(existing_code), potential_code)
+      end)
 
     case is_duplicate_code do
       true -> generate_unique_game_code(all_codes)
@@ -255,7 +262,9 @@ defmodule MtgTreachery.Multiplayer do
       {:ok, _updated_game} ->
         Game.broadcast_game(game.id)
         Game.broadcast_game_start(game.id)
-      {:error, changeset} -> {:error, changeset}
+
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 
@@ -278,12 +287,12 @@ defmodule MtgTreachery.Multiplayer do
     %{}
   end
 
-  def maybe_join_game(%{game_code: game_code, user_uuid: user_uuid}) do
+  def maybe_join_game(%{game_code: game_code, user_uuid: user_uuid, name: name}) do
     possible_game = Repo.get_by(Game, game_code: game_code)
 
     case possible_game do
       nil -> {:error, :invalid_game_code}
-      game -> create_player(%{user_uuid: user_uuid}, game)
+      game -> create_player(%{user_uuid: user_uuid, name: name}, game)
     end
   end
 
@@ -291,8 +300,9 @@ defmodule MtgTreachery.Multiplayer do
     update_player(player, %{status: :inactive})
 
     # if all players are now inactive, mark game as inactive
-    all_active_players = get_players_by_game_id(player.game_id)
-    |> Enum.filter(&(&1.status !== :inactive))
+    all_active_players =
+      get_players_by_game_id(player.game_id)
+      |> Enum.filter(&(&1.status !== :inactive))
 
     if Enum.empty?(all_active_players) do
       update_game(player.game, %{status: :inactive})

@@ -22,13 +22,13 @@
     <input type="text" class="hidden" disabled value={@game.game_code} id="game_code_input" />
   </header> --%>
 
-  <.link class="self-start text-blue-700 underline" navigate={~p"/game"}>
-    Back to Lobby
+  <.link class="self-start text-blue-500 underline ml-4" navigate={~p"/game"}>
+    ◀ Back to Lobby
   </.link>
-  
+
   <div class="my-2">
-  <%= name_component(assigns) %>
-    </div>
+    <%= name_component(assigns) %>
+  </div>
   <div id="identity-panel" class="flex flex-col items-center gap-y-4 w-full">
     <%= if @selected_player.identity != nil do %>
       <IdentityCard.show

@@ -1,6 +1,6 @@
 <div class="flex flex-col h-full">
-  <header class="px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
+  <header class="px-4 sm:px-6 lg:px-8 bg-slate-900 text-white">
+    <div class="flex items-center justify-between border-zinc-100 py-3 text-sm">
       <div class="flex items-center gap-4">
         <a href="/">
           MTG Cloak -- MTG Treachery Helper
@@ -8,7 +8,7 @@
       </div>
     </div>
   </header>
-  <main class="md:py-20 md:px-6 lg:px-8 flex-grow">
+  <main class="md:py-20 md:px-6 lg:px-8 flex-grow bg-slate-900 text-zinc-200">
     <div class="md:mx-auto md:max-w-2xl h-full flex flex-col">
       <.flash_group flash={@flash} />
       <%= @inner_content %>

@@ -6,11 +6,12 @@ defmodule MtgTreacheryWeb.GameLive.Join do
     ~H"""
     <section>
       <.header>
-      Enter Game Code
+      Join a Game
       </.header>
       <.form phx-change="validate" phx-submit="attempt_join" for={@form}>
-        <.input field={@form[:game_code]} />
-        <.button>Join Game</.button>
+        <.input field={@form[:game_code]} label="Game Code"/>
+        <.input field={@form[:name]} label="In-Game Name"/>
+        <.button class="mt-2">Join Game</.button>
       </.form>
     </section>
     """
@@ -22,7 +23,7 @@ defmodule MtgTreacheryWeb.GameLive.Join do
     {
       :ok,
       socket
-      |> assign(:form, to_form(%{"game_code" => ""}))
+      |> assign(:form, to_form(%{"game_code" => "", "name" => "New Player"}))
       |> assign(:user_uuid, user_uuid)
     }
   end
@@ -35,8 +36,8 @@ defmodule MtgTreacheryWeb.GameLive.Join do
     }
   end
 
-  def handle_event("attempt_join", %{"game_code" => game_code}, socket) do
-    case Multiplayer.maybe_join_game(%{game_code: game_code, user_uuid: socket.assigns.user_uuid}) do
+  def handle_event("attempt_join", %{"game_code" => game_code, "name" => name}, socket) do
+    case Multiplayer.maybe_join_game(%{game_code: game_code, user_uuid: socket.assigns.user_uuid, name: name}) do
       {:ok, _player} -> {:noreply, socket |> push_navigate(to: ~p"/game/lobby")}
       _ -> {:noreply, socket}
     end
