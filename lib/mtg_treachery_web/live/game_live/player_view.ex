@@ -56,6 +56,13 @@ defmodule MtgTreacheryWeb.GameLive.PlayerView do
     {:noreply, socket |> flip_card()}
   end
 
+  def handle_event("veil", _params, socket) do
+    Multiplayer.update_player(socket.assigns.current_player, %{status: :veiled})
+
+    {:noreply, socket |> flip_card()}
+  end
+
+
   def handle_event("start_editing_name", unsigned_params, socket) do
     {:noreply, socket |> assign(:is_editing_name, true)}
   end
@@ -80,6 +87,17 @@ defmodule MtgTreacheryWeb.GameLive.PlayerView do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_player_form(socket, changeset)}
     end
+  end
+
+  def handle_event("leave_game", _params, socket) do
+    Multiplayer.update_player(socket.assigns.current_player, %{status: :inactive})
+
+    {
+      :noreply,
+      socket
+      |> put_flash(:info, "Game left successfully")
+      |> push_navigate(to: ~p"/")
+    }
   end
 
   @impl true

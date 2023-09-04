@@ -1,6 +1,7 @@
 defmodule MtgTreacheryWeb.GameLive.Show do
   use MtgTreacheryWeb, :live_view
 
+  alias MtgTreacheryWeb.Styling
   alias MtgTreachery.Multiplayer
   alias MtgTreacheryWeb.GameLive.Panels.{LobbyPanel, IdentityPanel, SettingsPanel, PlayerPanel}
   alias MtgTreachery.LifeTotals.{Cache, Server}
@@ -54,17 +55,6 @@ defmodule MtgTreacheryWeb.GameLive.Show do
       socket
       |> push_event("copy_game_code", %{id: "game_code_input"})
       |> put_flash(:info, "Copied!")
-    }
-  end
-
-  def handle_event("leave_game", _params, socket) do
-    Multiplayer.update_player(socket.assigns.current_player, %{status: :inactive})
-
-    {
-      :noreply,
-      socket
-      |> put_flash(:info, "Game left successfully")
-      |> push_navigate(to: ~p"/")
     }
   end
 

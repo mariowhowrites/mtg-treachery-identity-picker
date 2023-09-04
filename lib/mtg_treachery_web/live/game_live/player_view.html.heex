@@ -1,4 +1,8 @@
-<div class="flex flex-col items-center">
+<.link class="self-start text-blue-500 underline ml-4 mt-4 justify-self-start" navigate={~p"/game"}>
+  ◀ Back to Lobby
+</.link>
+
+<div class="flex flex-col items-center justify-center h-full">
   <%!-- <header class="flex flex-col items-center gap-x-2 py-4">
     <.link patch={~p"/game"}>
       <h1 class="font-bold text-2xl">Game <%= @game.game_code %></h1>
@@ -21,15 +25,9 @@
     </button>
     <input type="text" class="hidden" disabled value={@game.game_code} id="game_code_input" />
   </header> --%>
-
-  <.link class="self-start text-blue-500 underline ml-4" navigate={~p"/game"}>
-    ◀ Back to Lobby
-  </.link>
-
-  <div class="my-2">
-    <%= name_component(assigns) %>
-  </div>
-  <div id="identity-panel" class="flex flex-col items-center gap-y-4 w-full">
+  <%= name_component(assigns) %>
+  
+  <section id="identity-panel" class="flex flex-col items-center gap-y-4 w-full mt-4 md:mt-8">
     <%= if @selected_player.identity != nil do %>
       <IdentityCard.show
         is_card_flipped={@is_card_flipped}
@@ -39,16 +37,32 @@
     <% else %>
       <h2>No identity yet! Start a game first</h2>
     <% end %>
-  </div>
+  </section>
 
-  <%= if @current_player.id == @selected_player.id do %>
-    <h2>Settings</h2>
+  <section id="controls" class="gap-2">
+    <%= if @current_player.id == @selected_player.id do %>
     <%= if @selected_player.creator and @game.status == :waiting and !Multiplayer.is_game_full(@game) do %>
       <button
         phx-click="add_player"
         class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
       >
         Add Player
+      </button>
+    <% end %>
+    <%= if @game.status == :live and @selected_player.status == :veiled do %>
+      <button
+        phx-click="unveil"
+        class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+      >
+        Unveil
+      </button>
+    <% end %>
+    <%= if @game.status == :live and @selected_player.status == :unveiled do %>
+      <button
+        phx-click="veil"
+        class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+      >
+        Veil
       </button>
     <% end %>
     <button
@@ -58,4 +72,6 @@
       Leave Game
     </button>
   <% end %>
+  </section>
+
 </div>
