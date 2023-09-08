@@ -62,7 +62,7 @@ defmodule MtgTreacheryWeb.GameLive.Show do
     case(socket.assigns.current_player.creator) do
       true ->
         Multiplayer.start_game(socket.assigns.game)
-        {:noreply, socket |> push_navigate(to: ~p"/player/#{socket.assigns.current_player.id}")}
+        {:noreply, socket}
 
       false ->
         {:noreply, socket}

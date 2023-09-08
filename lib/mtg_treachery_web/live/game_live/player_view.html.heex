@@ -1,4 +1,7 @@
-<.link class="self-start text-blue-500 underline ml-4 mt-4 justify-self-start" navigate={~p"/game"}>
+<.link
+  class="self-start text-blue-500 underline ml-4 mt-4 justify-self-start"
+  navigate={~p"/game"}
+>
   ◀ Back to Lobby
 </.link>
 
@@ -25,8 +28,13 @@
     </button>
     <input type="text" class="hidden" disabled value={@game.game_code} id="game_code_input" />
   </header> --%>
-  <%= name_component(assigns) %>
-  
+  <span class="flex gap-2 align-middle">
+    <h1 class="font-bold text-2xl"><%= @selected_player.name %></h1>
+    <%= if @current_player.id == @selected_player.id do %>
+    <.link patch={~p"/player/#{@selected_player.id}/settings"}><.icon name="hero-pencil-square" /></.link>
+    <% end %>
+  </span>
+
   <section id="identity-panel" class="flex flex-col items-center gap-y-4 w-full mt-4 md:mt-8">
     <%= if @selected_player.identity != nil do %>
       <IdentityCard.show
@@ -39,39 +47,55 @@
     <% end %>
   </section>
 
-  <section id="controls" class="gap-2">
+  <section id="controls" class="flex flex-col mt-2 gap-2">
     <%= if @current_player.id == @selected_player.id do %>
-    <%= if @selected_player.creator and @game.status == :waiting and !Multiplayer.is_game_full(@game) do %>
-      <button
-        phx-click="add_player"
-        class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
-      >
-        Add Player
-      </button>
+      <%= if @selected_player.creator and @game.status == :waiting and !Multiplayer.is_game_full(@game) do %>
+        <button
+          phx-click="add_player"
+          class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+        >
+          Add Player
+        </button>
+      <% end %>
+      <%= if @game.status == :live and @current_player.status == :veiled do %>
+        <button
+          phx-click="unveil"
+          class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+        >
+          Unveil
+        </button>
+      <% end %>
+      <%= if @game.status == :live and @current_player.status == :unveiled do %>
+        <button
+          phx-click="veil"
+          class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+        >
+          Veil
+        </button>
+      <% end %>
+      <.link class="text-center" patch={~p"/player/#{@current_player.id}/settings"}>Settings</.link>
     <% end %>
-    <%= if @game.status == :live and @selected_player.status == :veiled do %>
-      <button
-        phx-click="unveil"
-        class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
-      >
-        Unveil
-      </button>
-    <% end %>
-    <%= if @game.status == :live and @selected_player.status == :unveiled do %>
-      <button
-        phx-click="veil"
-        class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
-      >
-        Veil
-      </button>
-    <% end %>
+  </section>
+</div>
+
+<.modal
+  :if={@live_action == :settings}
+  id="player-settings-modal"
+  show
+  on_cancel={JS.patch(~p"/player/#{@current_player.id}")}
+>
+  <div class="flex flex-col items-start">
+    <.live_component
+      module={MtgTreacheryWeb.GameLive.SettingsForm}
+      id="settings-form"
+      player={@current_player}
+      patch={~p"/player/#{@selected_player.id}"}
+    />
     <button
       phx-click="leave_game"
-      class="px-4 mt-2 py-2 bg-red-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+      class="px-4 mt-8 py-2 bg-red-700 text-white rounded-lg shadow-sm hover:shadow-lg self-end"
     >
       Leave Game
     </button>
-  <% end %>
-  </section>
-
-</div>
+  </div>
+</.modal>

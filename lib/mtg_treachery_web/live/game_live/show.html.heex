@@ -19,23 +19,25 @@
           id="lobby_panel"
         />
       </div>
-      <div
+      <aside
         id="current-player-controls"
         class="bg-gray-200 text-black text-center h-1/4 relative flex"
       >
         <div class="flex w-full">
-          <div id="current-player-info" class="w-1/3 flex flex-col items-center justify-center">
+          <div
+            id="current-player-controls-left"
+            class="w-1/3 flex flex-col items-center justify-center"
+          >
             <h3 class="text-lg font-semibold"><%= @current_player.name %></h3>
-            <button
-              phx-click="view_player"
-              phx-value-player-id={@current_player.id}
+            <.link
+              patch={~p"/player/#{@current_player.id}/settings"}
               class="text-blue-800 text-sm"
             >
               (edit)
-            </button>
+            </.link>
           </div>
           <div
-            id="current-player-identity"
+            id="current-player-controls-center"
             class="w-1/3 flex flex-col items-center justify-center"
           >
             <.link navigate={~p"/player/#{@current_player.id}"}>
@@ -47,22 +49,29 @@
                   <div class="border-2 border-zinc-300 rounded-lg bg-back h-24 w-16" />
                 <% end %>
                 <%= if @current_player.status == :unveiled do %>
-                  <div class={["border-2 rounded-lg border-zinc-300 bg-back h-24 w-16", Styling.role_background(@current_player.identity.role)]} />
+                  <div class={[
+                    "border-2 rounded-lg border-zinc-300 bg-back h-24 w-16",
+                    Styling.role_background(@current_player.identity.role)
+                  ]} />
                 <% end %>
               <% end %>
             </.link>
+          </div>
+          <div id="current-player-controls-right" class="w-1/3 flex flex-col items-center justify-center">
+            <%= if @game.status == :waiting do %>
+              <div><%= length(@game.players) %> / <%= @game.player_count %></div>
+              <div class="text-sm">players joined</div>
+            <% end %>
             <%= if should_show_start_game_button(@game, @current_player) do %>
               <button
                 phx-click="start_game"
-                class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+                class="px-4 py-2 bg-indigo-700 text-white mt-2 rounded-lg shadow-sm hover:shadow-lg"
               >
                 Start Game
               </button>
             <% end %>
-          </div>
-          <div id="current-player-life-controls" class="w-1/3">
             <%= if should_show_life_controls(@game, @current_player) do %>
-              <div class="flex flex-col h-full relative">
+              <div class="flex flex-col h-full relative w-full">
                 <button
                   phx-click="gain_life"
                   phx-value-player-id={@current_player.id}
@@ -88,7 +97,7 @@
             <% end %>
           </div>
         </div>
-      </div>
+      </aside>
     </section>
   </article>
 </section>

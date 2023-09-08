@@ -2,6 +2,7 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
   use MtgTreacheryWeb, :live_component
 
   alias MtgTreachery.Multiplayer
+  alias MtgTreacheryWeb.Styling
 
   @impl true
   def render(assigns) do
@@ -11,7 +12,8 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
         <h3 class="hidden">Other Players</h3>
         <ul class={grid_wrapper_classes(@game)}>
           <%= for {player, index} <- other_players(@game, @current_player) do %>
-            <li class={other_player_card_wrapper_style(player, index, @game)}>
+            <%!-- <li class={"#{Styling.role_background_color(player.identity.role)}"}> --%>
+            <li class={other_player_wrapper_classes(@game, player, index)}>
               <div class="text-center h-full flex flex-col items-center justify-center">
                 <span><%= player.name %></span>
                 <%!-- testing button below, remove in prod --%>
@@ -57,45 +59,28 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
     |> Enum.with_index()
   end
 
-  defp other_slots(game) do
-    List.duplicate(nil, game.player_count - 1)
+  defp other_player_wrapper_classes(game, player, index) do
+    ["mb-1"]
+    |> maybe_add_right_border(index)
+    |> add_background_color(player)
   end
 
-  # # leader
-  # defp other_player_card_wrapper_style(player, index, game) when index === 0 do
-  #   "bg-orange-700"
-  # end
+  defp maybe_add_right_border(class_list, index) do
+    if rem(index, 2) == 0, do: class_list ++ ["mr-1"], else: class_list
+  end
 
-  # # guardian
-  # defp other_player_card_wrapper_style(player, index, game) when index === 1 do
-  #   "bg-teal-700"
-  # end
-
-  # # assassin
-  # defp other_player_card_wrapper_style(player, index, game) when index === 2 do
-  #   "bg-red-700"
-  # end
-
-  # # traitor
-  # defp other_player_card_wrapper_style(player, index, game) when index === 3 do
-  #   "bg-violet-700"
-  # end
-
-  defp other_player_card_wrapper_style(player, index, game) do
+  defp add_background_color(class_list, player) do
     [
-      "transition-colors",
-      case player.identity do
-        nil -> "bg-gray-700"
-        _ -> ["bg-gray-700", player_color(player)]
+      class_list,
+      case player.status do
+        :veiled -> "bg-gray-700"
+        _ -> Styling.role_background_color(player.identity.role)
       end
     ]
   end
 
-  defp player_color(player) do
-    case player.status do
-      :veiled -> "bg-gray-700"
-      _ -> role_color(player.identity.role)
-    end
+  defp other_slots(game) do
+    List.duplicate(nil, game.player_count - 1)
   end
 
   defp grid_wrapper_classes(game) do
@@ -106,15 +91,6 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
     (player_count / 2)
     |> Float.floor()
     |> trunc()
-  end
-
-  defp role_color(role) do
-    case role do
-      "Leader" -> "border-amber-400 border-4"
-      "Guardian" -> "border-cyan-600 border-4"
-      "Assassin" -> "border-rose-600 border-4"
-      "Traitor" -> "border-violet-700 border-4"
-    end
   end
 
   def identity_text(player) when player.identity == nil do
@@ -129,25 +105,12 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
     assigns = %{player: player}
 
     ~H"""
-      <div class="flex flex-col">
-        <span><%= @player.identity.role %></span>
-        <button phx-click="view_player" class="underline" phx-value-player-id={@player.id}>
-          <%= @player.identity.name %>
-        </button>
-      </div>
+    <div class="flex flex-col">
+      <span class="font-semibold"><%= @player.identity.role %></span>
+      <.link navigate={~p"/player/#{@player.id}"} class="underline">
+        <%= @player.identity.name %>
+      </.link>
+    </div>
     """
   end
-
-  # defp identity_text(player) do
-  #   assigns = %{player: player}
-
-  #   ~H"""
-  #     <span><%= player.status %></span>
-  #       <%!-- test button, remove for prod --%>
-  #     <%= if player.identity != nil and player.status != :veiled do %>
-  #       <button phx-click="view_player" class="underline" phx-value-player-id={player.id}>
-  #         <%= player.identity.role %> - <%= player.identity.name %>
-  #       </button>
-  #   """
-  # end
 end

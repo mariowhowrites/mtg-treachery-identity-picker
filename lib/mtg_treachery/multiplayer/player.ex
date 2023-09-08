@@ -19,7 +19,7 @@ defmodule MtgTreachery.Multiplayer.Player do
 
   def changeset(player, attrs) do
     player
-    |> cast(attrs, [:user_uuid, :name, :creator, :status])
+    |> cast(attrs, [:user_uuid, :name, :creator, :status, :identity_id])
     |> validate_required([:user_uuid, :name])
   end
 

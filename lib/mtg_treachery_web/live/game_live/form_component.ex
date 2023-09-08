@@ -10,7 +10,7 @@ defmodule MtgTreacheryWeb.GameLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage game records in your database.</:subtitle>
+        <:subtitle>After creating a game, use the game code at the top of the lobby screen to invite other players.</:subtitle>
       </.header>
 
       <.simple_form
@@ -24,7 +24,7 @@ defmodule MtgTreacheryWeb.GameLive.FormComponent do
         <%!-- <.input field={@form[:rarity]} type="checkbox" label="Rarity" options={["Uncommon": "uncommon", "Rare": "rare", "Mythic Rare": "mythic"]} /> --%>
         <.checkgroup field={@form[:rarities]} label="Rarities" options={Game.rarity_options()} />
         <:actions>
-          <.button phx-disable-with="Saving...">Save Game</.button>
+          <.button phx-disable-with="Saving...">Create Game</.button>
         </:actions>
       </.simple_form>
     </div>

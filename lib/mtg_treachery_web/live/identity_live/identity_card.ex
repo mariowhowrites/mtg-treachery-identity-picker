@@ -16,13 +16,23 @@ defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
         style="transform: rotateY(0deg); backface-visibility: hidden;"
       >
         <%= if @selected_player.id == @current_player.id do %>
-          <button
+        <div class="flex flex-col items-center">
+          <%!-- <button
             class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
             phx-click="peek"
             phx-target="#identity-panel"
           >
             Peek
+          </button> --%>
+          <button
+            class="text-indigo-700 font-bold underline py-1 px-2"
+            phx-click="peek"
+            phx-target="#identity-panel"
+          >
+            Peek
           </button>
+        <span class="text-sm">(look at card without unveiling)</span>
+        </div>
         <% end %>
       </div>
       <div
@@ -30,11 +40,11 @@ defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
         class={identity_card_front_classes(@selected_player)}
         style="transform: rotateY(180deg); backface-visibility: hidden;"
       >
-        <div
-          id="identity-card-content"
-          class="h-full flex flex-col items-center justify-between"
-        >
-          <section id="identity-header" class="text-center bg-stone-100 w-full py-2 border border-2 px-4 rounded-t-xl">
+        <div id="identity-card-content" class="h-full flex flex-col items-center justify-between">
+          <section
+            id="identity-header"
+            class="text-center bg-stone-100 w-full py-2 border border-2 px-4 rounded-t-xl"
+          >
             <h3 class="text-lg font-bold text-zinc-800"><%= @selected_player.identity.name %></h3>
           </section>
           <div class="flex flex-col items-center bg-stone-100 text-zinc-800 mx-4 mb-4">
