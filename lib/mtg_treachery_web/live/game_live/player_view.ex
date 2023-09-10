@@ -54,14 +54,14 @@ defmodule MtgTreacheryWeb.GameLive.PlayerView do
   def handle_event("unveil", _params, socket) do
     Multiplayer.update_player(socket.assigns.current_player, %{status: :unveiled})
 
-    {:noreply, socket |> assign(:is_card_flipped, true)}
+    {:noreply, socket |> assign(:is_card_flipped, true) |> put_flash(:info, "You have unveiled!")}
   end
 
   def handle_event("veil", _params, socket) do
     Multiplayer.update_player(socket.assigns.current_player, %{status: :veiled})
 
     {:noreply,
-     socket |> assign(:is_card_flipped, false) |> put_flash(:info, "You have unveiled!")}
+     socket |> assign(:is_card_flipped, false)}
   end
 
   def handle_event("leave_game", _params, socket) do
@@ -77,18 +77,16 @@ defmodule MtgTreacheryWeb.GameLive.PlayerView do
 
   @impl true
   def handle_info({:game, game_id}, socket) do
-    IO.inspect("got a new game over the wire")
-
     game = Multiplayer.get_game!(game_id)
-    player = get_current_player_from_game(game, socket.assigns.current_player.user_uuid)
-
-    IO.inspect(player)
+    current_player = get_current_player_from_game(game, socket.assigns.current_player.user_uuid)
+    selected_player = Enum.find(game.players, fn player -> player.id == socket.assigns.current_player.id end)
 
     {
       :noreply,
       socket
       |> assign(:game, game)
-      |> assign(:current_player, player)
+      |> assign(:current_player, current_player)
+      |> assign(:selected_player, current_player)
     }
   end
 

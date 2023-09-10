@@ -2,7 +2,7 @@ defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
   alias MtgTreachery.Multiplayer
   use MtgTreacheryWeb, :html
 
-  def show(assigns) do
+  def show(assigns) when assigns.selected_player.identity != nil do
     ~H"""
     <div
       id="identity-card"
@@ -60,6 +60,15 @@ defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
           </div>
         </div>
       </div>
+    </div>
+    """
+  end
+
+  def show(assigns) when assigns.selected_player.identity == nil do
+    ~H"""
+    <div class="w-72 h-[27rem] border-2 rounded-lg border-dashed border-zinc-500 bg-gray-200 text-black flex flex-col gap-2 items-center justify-center">
+      <p class="text-center">No identity yet!</p>
+      <p class="text-center">Check back again once the game starts.</p>
     </div>
     """
   end

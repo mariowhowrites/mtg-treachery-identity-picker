@@ -47,8 +47,6 @@ defmodule MtgTreacheryWeb.GameLive.Panels.IdentityPanel do
   end
 
   defp determine_flip_status(assigns) do
-    IO.inspect(assigns)
-
     case Map.has_key?(assigns, :is_peeking) do
       true -> assigns.is_peeking
       false -> assigns.current_player.status == :unveiled

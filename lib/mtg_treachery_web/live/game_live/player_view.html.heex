@@ -36,15 +36,11 @@
   </span>
 
   <section id="identity-panel" class="flex flex-col items-center gap-y-4 w-full mt-4 md:mt-8">
-    <%= if @selected_player.identity != nil do %>
-      <IdentityCard.show
-        is_card_flipped={@is_card_flipped}
-        selected_player={@selected_player}
-        current_player={@current_player}
-      />
-    <% else %>
-      <h2>No identity yet! Start a game first</h2>
-    <% end %>
+    <IdentityCard.show
+      is_card_flipped={@is_card_flipped}
+      selected_player={@selected_player}
+      current_player={@current_player}
+    />
   </section>
 
   <section id="controls" class="flex flex-col mt-2 gap-2">
@@ -79,7 +75,7 @@
 </div>
 
 <.modal
-  :if={@live_action == :settings}
+  :if={@live_action == :settings and @current_player.id == @selected_player.id}
   id="player-settings-modal"
   show
   on_cancel={JS.patch(~p"/player/#{@current_player.id}")}
@@ -88,12 +84,12 @@
     <.live_component
       module={MtgTreacheryWeb.GameLive.SettingsForm}
       id="settings-form"
-      player={@current_player}
+      player={@selected_player}
       patch={~p"/player/#{@selected_player.id}"}
     />
     <button
       phx-click="leave_game"
-      class="px-4 mt-8 py-2 bg-red-700 text-white rounded-lg shadow-sm hover:shadow-lg self-end"
+      class="underline text-red-500 rounded-lg mt-8 shadow-sm hover:shadow-lg"
     >
       Leave Game
     </button>

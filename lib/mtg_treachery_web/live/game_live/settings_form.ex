@@ -16,7 +16,12 @@ defmodule MtgTreacheryWeb.GameLive.SettingsForm do
       >
         <.input field={@form[:name]} label="Name" />
         <%= if @player.identity != nil and Ecto.assoc_loaded?(@player.identity) do %>
-        <.input field={@form[:identity_id]} type="select" label="Identity" options={identity_options(@identities)}/>
+          <.input
+            field={@form[:identity_id]}
+            type="select"
+            label="Identity"
+            options={identity_options(@identities)}
+          />
         <% end %>
         <:actions>
           <.button phx-disable-with="Saving...">Save</.button>
@@ -26,12 +31,9 @@ defmodule MtgTreacheryWeb.GameLive.SettingsForm do
     """
   end
 
-  def update(%{player: player} = assigns, socket) do
+  def update(%{player: player} = assigns, socket)
     changeset = Player.settings_changeset(player, %{})
     identities = Multiplayer.list_identities()
-
-    IO.inspect(player.identity)
-    IO.inspect(player.identity == nil)
 
     {
       :ok,
@@ -42,7 +44,7 @@ defmodule MtgTreacheryWeb.GameLive.SettingsForm do
     }
   end
 
-  def handle_event("validate", %{"player" => player_params}, socket) do
+  def handle_event("validate", %{"player" => player_params}, socket)
     changeset =
       socket.assigns.player
       |> Player.settings_changeset(player_params)
@@ -54,19 +56,24 @@ defmodule MtgTreacheryWeb.GameLive.SettingsForm do
   def handle_event("save", %{"player" => player_params}, socket) do
     case Multiplayer.update_player_identity(socket.assigns.player, player_params) do
       {:ok, game} ->
-        IO.inspect("lol?")
-        IO.inspect(game)
         {:noreply, socket |> push_patch(to: ~p"/player/#{socket.assigns.player.id}")}
+
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_player_form(socket, changeset)}
     end
   end
 
   defp identity_options(identities) do
-    identities |> Enum.reduce([], fn (identity, acc) -> acc ++ ["#{identity.name}": identity.id] end)
+    identities
+    |> Enum.sort_by(&{&1.role, &1.rarity})
+    |> Enum.reduce([], &create_identity_list/2)
   end
 
-  defp assign_player_form(socket, %Ecto.Changeset{} = changeset) do
+  defp create_identity_list(identity, list) do
+    list ++ ["#{identity.name} - #{identity.role} #{identity.rarity}": identity.id]
+  end
+
+  defp assign_player_form(socket, %Ecto.Changeset{} = changeset) ˝
     assign(socket, :form, to_form(changeset))
   end
 end
