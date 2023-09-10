@@ -31,7 +31,7 @@ defmodule MtgTreacheryWeb.GameLive.SettingsForm do
     """
   end
 
-  def update(%{player: player} = assigns, socket)
+  def update(%{player: player} = assigns, socket) do
     changeset = Player.settings_changeset(player, %{})
     identities = Multiplayer.list_identities()
 
@@ -44,7 +44,7 @@ defmodule MtgTreacheryWeb.GameLive.SettingsForm do
     }
   end
 
-  def handle_event("validate", %{"player" => player_params}, socket)
+  def handle_event("validate", %{"player" => player_params}, socket) do
     changeset =
       socket.assigns.player
       |> Player.settings_changeset(player_params)
@@ -73,7 +73,7 @@ defmodule MtgTreacheryWeb.GameLive.SettingsForm do
     list ++ ["#{identity.name} - #{identity.role} #{identity.rarity}": identity.id]
   end
 
-  defp assign_player_form(socket, %Ecto.Changeset{} = changeset) ˝
+  defp assign_player_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
   end
 end
