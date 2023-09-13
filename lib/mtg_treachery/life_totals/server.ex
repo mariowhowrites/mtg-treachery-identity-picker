@@ -25,6 +25,10 @@ defmodule MtgTreachery.LifeTotals.Server do
     GenServer.cast(server, {:lose_life, player_id})
   end
 
+  def shutdown(server) do
+    GenServer.stop(server)
+  end
+
   defp via_tuple(game_id) do
     ProcessRegistry.via_tuple({__MODULE__, game_id})
   end

@@ -22,11 +22,12 @@ defmodule MtgTreachery.Application do
       MtgTreachery.LifeTotals.ProcessRegistry,
       # Attach life total servers to any existing games
       MtgTreachery.Tasks.LifeServerSetup,
+      # Check for old games and shutdown related life total servers
+      MtgTreachery.CronJobs.CleanupLifeTotalServers,
       # Start the Endpoint (http/https)
       MtgTreacheryWeb.Endpoint
       # Start a worker by calling: MtgTreachery.Worker.start_link(arg)
       # {MtgTreachery.Worker, arg}
-
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -10,10 +10,12 @@ defmodule MtgTreachery.Multiplayer do
   alias MtgTreachery.Multiplayer.{Game, Player, Identity, IdentityPicker}
   alias MtgTreachery.LifeTotals.{Cache, Server}
 
+  #
+  # Game Functions
+  #
+
   @doc """
   Returns the list of games.
-
-  Note: Not used anywhere atm, full list of games is not relevant data for anyone
 
   ## Examples
 
@@ -43,7 +45,7 @@ defmodule MtgTreachery.Multiplayer do
 
   # return the most recent game that inclues the user_uuid amongst players
   def get_game_by_user_uuid(user_uuid) do
-    game_query =
+    Repo.one(
       from(g in Game,
         join: p in assoc(g, :players),
         where: p.user_uuid == ^user_uuid,
@@ -53,10 +55,7 @@ defmodule MtgTreachery.Multiplayer do
         order_by: [desc: :inserted_at],
         limit: 1
       )
-
-    game = Repo.one(game_query)
-
-    game
+    )
   end
 
   def get_game_by_game_id(game_id) do
@@ -68,24 +67,18 @@ defmodule MtgTreachery.Multiplayer do
     )
   end
 
-  def get_player_by_user_uuid(user_uuid) do
-    player_query =
-      from(p in Player,
-        where: p.user_uuid == ^user_uuid,
-        order_by: [desc: :inserted_at],
-        limit: 1,
-        preload: :identity
+  # get all games created before provided datetime
+  def get_games_older_than_datetime(cutoff_date) do
+    Repo.all(
+      from(g in Game,
+        where: g.inserted_at < ^cutoff_date,
+        preload: [:players]
       )
-
-    Repo.one(player_query)
-  end
-
-  def is_game_full(game) do
-    length(game.players) == game.player_count
+    )
   end
 
   def create_game(attrs \\ %{}) do
-    all_codes = get_all_game_codes()
+    all_codes = list_game_codes()
     game_code = generate_unique_game_code(all_codes)
 
     {:ok, game} =
@@ -99,77 +92,36 @@ defmodule MtgTreachery.Multiplayer do
     {:ok, game}
   end
 
-  def create_game_with_player(game_params, user_uuid) do
-    {:ok, game} = create_game(game_params)
-    create_player(%{user_uuid: user_uuid, creator: true}, game)
-
-    {:ok, game}
+  def is_game_full(game) do
+    length(game.players) == game.player_count
   end
 
-  def maybe_create_player(player_params, game) do
-    case is_game_full(game) do
-      true -> {:error, :game_full}
-      false -> create_player(player_params, game)
+  def get_game_by_game_code(game_code) do
+    Repo.get_by(Game, game_code: game_code)
+  end
+
+  def leave_game(player) do
+    update_player(player, %{status: :inactive})
+
+    # if all players are now inactive, mark game as inactive
+    all_active_players =
+      get_players_by_game_id(player.game_id)
+      |> Enum.filter(&(&1.status !== :inactive))
+
+    if Enum.empty?(all_active_players) do
+      update_game(player.game, %{status: :inactive})
     end
   end
 
-  def create_player(player_params, game) do
-    %Player{}
-    |> Player.changeset(player_params)
-    |> Changeset.put_assoc(:game, game)
-    |> Repo.insert()
-    |> maybe_broadcast_new_player(game)
+  def end_game(game) do
+    {:ok, game} = update_game(game, %{status: :inactive})
+
+    shutdown_life_totals_server(game)
   end
 
-  def update_player(%Player{} = player, attrs) do
-    result =
-      player
-      |> Player.changeset(attrs)
-      |> Repo.update()
-
-    case result do
-      {:ok, player} ->
-        Game.broadcast_game(player.game_id)
-        {:ok, player}
-
-      _ ->
-        result
-    end
-  end
-
-  def update_player_identity(player, %{"name" => name, "identity_id" => identity_id}) do
-    update_player(player, %{"identity_id" => identity_id, "name" => name})
-  end
-
-  def update_player_identity(player, %{"name" => name}) do
-    update_player(player, %{"name" => name})
-  end
-
-  def change_player(%Player{} = player, attrs \\ %{}) do
-    Player.changeset(player, attrs)
-  end
-
-  def get_player_by_id!(id),
-    do: Repo.get!(Player, id) |> Repo.preload([:identity, game: [:players]])
-
-  def maybe_broadcast_new_player({:ok, player}, game) do
-    Game.broadcast_game(game.id)
-
-    life_total_server = Cache.server_process(game.id)
-    Server.add_player(life_total_server, player.id)
-
-    {:ok, player}
-  end
-
-  def maybe_broadcast_new_player({:error, changeset}, _game) do
-    {:error, changeset}
-  end
-
-  def get_players_by_game_id(game_id) do
-    Repo.all(
-      from p in Player,
-        where: p.game_id == ^game_id
-    )
+  defp shutdown_life_totals_server(game) do
+    Cache.server_process(game.id)
+    |> Server.shutdown()
   end
 
   @doc """
@@ -219,7 +171,100 @@ defmodule MtgTreachery.Multiplayer do
     Game.changeset(game, attrs)
   end
 
-  def get_all_game_codes() do
+  #
+  # Player Functions
+  #
+
+  def create_player(player_params, game) do
+    %Player{}
+    |> Player.changeset(player_params)
+    |> Changeset.put_assoc(:game, game)
+    |> Repo.insert()
+    |> maybe_broadcast_new_player(game)
+  end
+
+  def get_player_by_user_uuid(user_uuid) do
+    player_query =
+      from(p in Player,
+        where: p.user_uuid == ^user_uuid,
+        order_by: [desc: :inserted_at],
+        limit: 1,
+        preload: :identity
+      )
+
+    Repo.one(player_query)
+  end
+
+  def get_players_by_game_id(game_id) do
+    Repo.all(
+      from p in Player,
+        where: p.game_id == ^game_id
+    )
+  end
+
+  def update_player(%Player{} = player, attrs) do
+    result =
+      player
+      |> Player.changeset(attrs)
+      |> Repo.update()
+
+    case result do
+      {:ok, player} ->
+        Game.broadcast_game(player.game_id)
+        {:ok, player}
+
+      _ ->
+        result
+    end
+  end
+
+  def update_player_identity(player, %{"name" => name, "identity_id" => identity_id}) do
+    update_player(player, %{"identity_id" => identity_id, "name" => name})
+  end
+
+  def update_player_identity(player, %{"name" => name}) do
+    update_player(player, %{"name" => name})
+  end
+
+  def change_player(%Player{} = player, attrs \\ %{}) do
+    Player.changeset(player, attrs)
+  end
+
+  def get_player_by_id!(id),
+    do: Repo.get!(Player, id) |> Repo.preload([:identity, game: [:players]])
+
+  #
+  # Multiplayer Functions (interactions between players and games)
+  #
+
+  def create_game_with_player(game_params, user_uuid) do
+    {:ok, game} = create_game(game_params)
+    create_player(%{user_uuid: user_uuid, creator: true}, game)
+
+    {:ok, game}
+  end
+
+  def maybe_create_player(player_params, game) do
+    case is_game_full(game) do
+      true -> {:error, :game_full}
+      false -> create_player(player_params, game)
+    end
+  end
+
+  def maybe_broadcast_new_player({:ok, player}, game) do
+    Game.broadcast_game(game.id)
+
+    life_total_server = Cache.server_process(game.id)
+    Server.add_player(life_total_server, player.id)
+
+    {:ok, player}
+  end
+
+  def maybe_broadcast_new_player({:error, changeset}, _game) do
+    {:error, changeset}
+  end
+
+  def list_game_codes() do
     codes_query =
       from(g in Game,
         select: {g.game_code}
@@ -293,19 +338,6 @@ defmodule MtgTreachery.Multiplayer do
     case possible_game do
       nil -> {:error, :invalid_game_code}
       game -> create_player(%{user_uuid: user_uuid, name: name}, game)
-    end
-  end
-
-  def leave_game(player) do
-    update_player(player, %{status: :inactive})
-
-    # if all players are now inactive, mark game as inactive
-    all_active_players =
-      get_players_by_game_id(player.game_id)
-      |> Enum.filter(&(&1.status !== :inactive))
-
-    if Enum.empty?(all_active_players) do
-      update_game(player.game, %{status: :inactive})
     end
   end
 end
