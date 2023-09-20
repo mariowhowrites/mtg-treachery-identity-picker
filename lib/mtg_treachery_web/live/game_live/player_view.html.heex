@@ -31,7 +31,9 @@
   <span class="flex gap-2 align-middle">
     <h1 class="font-bold text-2xl"><%= @selected_player.name %></h1>
     <%= if @current_player.id == @selected_player.id do %>
-    <.link patch={~p"/player/#{@selected_player.id}/settings"}><.icon name="hero-pencil-square" /></.link>
+      <.link patch={~p"/player/#{@selected_player.id}/settings"}>
+        <.icon name="hero-pencil-square" />
+      </.link>
     <% end %>
   </span>
 
@@ -55,7 +57,7 @@
       <% end %>
       <%= if @game.status == :live and @current_player.status == :veiled do %>
         <button
-          phx-click="unveil"
+          phx-click="attempt_unveil"
           class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
         >
           Unveil
@@ -69,7 +71,9 @@
           Veil
         </button>
       <% end %>
-      <.link class="text-center" patch={~p"/player/#{@current_player.id}/settings"}>Settings</.link>
+      <.link class="text-center" patch={~p"/player/#{@current_player.id}/settings"}>
+        Settings
+      </.link>
     <% end %>
   </section>
 </div>
@@ -92,6 +96,23 @@
       class="underline text-red-500 rounded-lg mt-8 shadow-sm hover:shadow-lg"
     >
       Leave Game
+    </button>
+  </div>
+</.modal>
+
+<.modal
+  :if={@live_action == :confirm_unveil and @current_player.id == @selected_player.id}
+  id="confirm-unveil-modal"
+  show
+  on_cancel={JS.patch(~p"/player/#{@current_player.id}")}
+>
+  <div class="flex flex-col items-start gap-2">
+    <p>Are you sure you want to unveil? Your role will be revealed to the lobby!</p>
+    <button
+      phx-click="unveil"
+      class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+    >
+      Unveil
     </button>
   </div>
 </.modal>
