@@ -7,6 +7,8 @@ defmodule MtgTreachery.Application do
 
   @impl true
   def start(_type, _args) do
+    topologies = Application.get_env(:libcluster, :topologies) || []
+
     children = [
       # Start the Telemetry supervisor
       MtgTreacheryWeb.Telemetry,
@@ -18,16 +20,16 @@ defmodule MtgTreachery.Application do
       {Finch, name: MtgTreachery.Finch},
       # Start life server cache
       MtgTreachery.LifeTotals.Cache,
-      # Start life server process registry
-      MtgTreachery.LifeTotals.ProcessRegistry,
       # Attach life total servers to any existing games
       MtgTreachery.Tasks.LifeServerSetup,
       # Check for old games and shutdown related life total servers
       MtgTreachery.CronJobs.CleanupLifeTotalServers,
       # Start the Endpoint (http/https)
-      MtgTreacheryWeb.Endpoint
+      MtgTreacheryWeb.Endpoint,
       # Start a worker by calling: MtgTreachery.Worker.start_link(arg)
       # {MtgTreachery.Worker, arg}
+
+      {Cluster.Supervisor, [topologies, [name: MtgTreachery.ClsuterSupervisor]]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

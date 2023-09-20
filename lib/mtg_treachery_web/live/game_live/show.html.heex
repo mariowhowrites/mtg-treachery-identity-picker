@@ -73,11 +73,15 @@
                 Start Game
               </button>
             <% end %>
-            <div class="h-full w-full" x-data="{ delta: 0 }" @delta.debounce.5000ms="delta = 0">
-              <%= if should_show_life_controls(@game, @current_player) do %>
-                <div class="flex flex-col h-full relative w-full">
+            <%= if should_show_life_controls(@game, @current_player) do %>
+              <div class="flex flex-col h-full relative w-full">
+                <div
+                  x-data="{ delta: 0 }"
+                  @delta.debounce.5000ms="delta = 0"
+                  class="flex flex-col relative h-full w-full"
+                >
                   <button
-                    @click="delta = delta + 1; $dispatch('delta')"
+                    @click="delta = delta + 1; navigator.vibrate(50); $dispatch('delta')"
                     phx-click="gain_life"
                     phx-value-player-id={@current_player.id}
                     class="px-2 py-1 bg-green-500 text-white h-1/2"
@@ -85,13 +89,19 @@
                     <span class="hidden">
                       +
                     </span>
-                    <span x-text="delta" x-show="delta > 0" phx-update="ignore" id="positive-delta-indicator"></span>
+                    <span
+                      x-text="delta"
+                      x-show="delta > 0"
+                      phx-update="ignore"
+                      id="positive-delta-indicator"
+                    >
+                    </span>
                   </button>
                   <div class="absolute w-full h-full flex items-center justify-center text-white font-bold text-4xl pointer-events-none">
                     <%= @life_totals[@current_player.id] %>
                   </div>
                   <button
-                    @click="delta = delta - 1; $dispatch('delta')"
+                    @click="delta = delta - 1; navigator.vibrate(50); $dispatch('delta')"
                     phx-click="lose_life"
                     phx-value-player-id={@current_player.id}
                     class="px-2 py-1  bg-red-700 text-white h-1/2"
@@ -99,11 +109,17 @@
                     <span class="hidden">
                       -
                     </span>
-                    <span x-text="delta" x-show="delta < 0" phx-update="ignore" id="negative-delta-indicator"></span>
+                    <span
+                      x-text="delta"
+                      x-show="delta < 0"
+                      phx-update="ignore"
+                      id="negative-delta-indicator"
+                    >
+                    </span>
                   </button>
                 </div>
-              <% end %>
-            </div>
+              </div>
+            <% end %>
           </div>
         </div>
       </aside>

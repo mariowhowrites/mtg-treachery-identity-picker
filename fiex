@@ -2,4 +2,4 @@
 
 set -e
 
-fly ssh console --select -C "/app/bin/mtg_treachery remote"
+fly ssh console --pty --select -C "/app/bin/mtg_treachery remote"

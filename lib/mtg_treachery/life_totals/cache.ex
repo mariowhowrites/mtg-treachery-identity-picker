@@ -15,13 +15,25 @@ defmodule MtgTreachery.LifeTotals.Cache do
   end
 
   def server_process(game_id, players \\ %{}) do
-    case start_child(game_id, players) do
-      {:ok, pid} -> pid
-      {:error, {:already_started, pid}} -> pid
+    case existing_process(game_id) do
+      nil ->
+        new_process(game_id)
+
+      pid ->
+        pid
     end
   end
 
-  defp start_child(game_id, players) do
-    DynamicSupervisor.start_child(__MODULE__, {Server, {game_id, players}})
+  defp existing_process(game_id) do
+    Server.whereis(game_id)
+  end
+
+  defp new_process(game_id) do
+    case DynamicSupervisor.start_child(__MODULE__, {Server, game_id}) do
+      {:ok, pid} ->
+        pid
+      {:error, {:already_started, pid}} ->
+        pid
+    end
   end
 end

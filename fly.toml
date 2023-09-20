@@ -12,6 +12,7 @@ processes = []
 [env]
   PHX_HOST = "mtg-treachery.fly.dev"
   PORT = "8080"
+  RELEASE_COOKIE = "0kPSOX1tC91xaRitftGCOF6Rgtl8bGpZbxPhx3xkF4d8aUpUTtQ0Hw=="
 
 [[services]]
   internal_port = 8080

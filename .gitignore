@@ -37,3 +37,7 @@ npm-debug.log
 
 # Hide dev secrets
 **/*.secret.exs
+
+basic.conf
+
+observer
