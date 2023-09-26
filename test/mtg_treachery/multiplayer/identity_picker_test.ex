@@ -23,9 +23,12 @@ defmodule MtgTreachery.Multiplayer.IdentityPickerTest do
     end
 
     test "picks the correct rarity of identities" do
-      identities = IdentityPicker.pick_identities(5, ["uncommon"])
+      ["uncommon", "rare", "mythic"]
+      |> Enum.each(fn rarity ->
+        identities = IdentityPicker.pick_identities(5, [rarity])
 
-      assert Enum.all?(identities, &(&1.rarity == "Uncommon"))
+        assert Enum.all?(identities, &(&1.rarity == String.capitalize(rarity)))
+      end)
     end
   end
 
