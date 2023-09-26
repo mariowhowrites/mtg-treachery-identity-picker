@@ -317,6 +317,16 @@ defmodule MtgTreachery.Multiplayer do
     Repo.all(Identity)
   end
 
+  def import_all_identities() do
+    all_identities = Identity.all()
+
+    for identity_chunk <- Enum.chunk_every(all_identities, 10) do
+      Repo.insert_all(Identity, identity_chunk)
+    end
+
+    :ok
+  end
+
   def assign_player_identity(player, identity) do
     player
     |> Player.changeset(make_player_attrs(player, identity))
