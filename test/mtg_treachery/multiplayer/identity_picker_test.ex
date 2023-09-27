@@ -10,6 +10,10 @@ defmodule MtgTreachery.Multiplayer.IdentityPickerTest do
     :ok
   end
 
+  #
+  # Tests
+  #
+
   describe "identity_picker" do
     test "picks the correct amount of identities" do
       identities = IdentityPicker.pick_identities(5, ["uncommon"])
@@ -32,6 +36,10 @@ defmodule MtgTreachery.Multiplayer.IdentityPickerTest do
     end
   end
 
+  #
+  # Helpers
+  #
+
   defp assert_player_count_yields_expected_role_count(player_count) do
     config = IdentityPicker.get_config(player_count)
 
@@ -43,9 +51,11 @@ defmodule MtgTreachery.Multiplayer.IdentityPickerTest do
   end
 
   defp has_expected_role_count({role, count}, identities) do
+    # there is no guardian role in 4p games. if we are in 4p, guardian count should be 0 and the identities map should have no key for the guardian role
+    # otherwise, check the relevant property of the identities map to ensure the role count is correct
     case Map.has_key?(identities, role) do
-      true -> length(Map.get(identities, role)) == count
       false -> count == 0
+      true -> count == length(Map.get(identities, role))
     end
   end
 end
