@@ -294,7 +294,7 @@
         "Unveil Cost": "{0}"
     },
     {
-        "Description": "When The Cleaner is unveiled, if it's your main phase, exile all nonland permanents you don't control.",
+        "Description": "When The Banisher is unveiled, exile any number of target creatures. Draw a card for each nontoken creature exiled this way.",
         "Role": "Traitor",
         "Name": "The Banisher",
         "Rarity": "Rare",
