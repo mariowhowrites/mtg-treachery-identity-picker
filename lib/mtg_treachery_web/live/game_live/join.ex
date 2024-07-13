@@ -17,13 +17,13 @@ defmodule MtgTreacheryWeb.GameLive.Join do
     """
   end
 
-  def mount(_params, session, socket) do
+  def mount(%{"game_code" => game_code}, session, socket) do
     user_uuid = Map.get(session, "user_uuid")
 
     {
       :ok,
       socket
-      |> assign(:form, to_form(%{"game_code" => "", "name" => "New Player"}))
+      |> assign(:form, to_form(%{"game_code" => game_code, "name" => "New Player"}))
       |> assign(:user_uuid, user_uuid)
     }
   end

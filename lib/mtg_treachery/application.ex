@@ -29,7 +29,7 @@ defmodule MtgTreachery.Application do
       # Start a worker by calling: MtgTreachery.Worker.start_link(arg)
       # {MtgTreachery.Worker, arg}
 
-      {Cluster.Supervisor, [topologies, [name: MtgTreachery.ClsuterSupervisor]]}
+      {Cluster.Supervisor, [topologies, [name: MtgTreachery.ClusterSupervisor]]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -75,6 +75,25 @@
         Settings
       </.link>
     <% end %>
+
+    <%= if @current_player.creator and @current_player.id != @selected_player.id do %>
+      <h2>Admin Actions (ONLY USE IN EMERGENCY)</h2>
+      <%!-- force peek button --%>
+      <button
+        phx-click="force_peek"
+        class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+      >
+        Force Peek
+      </button>
+
+      <%!-- force unveil button --%>
+      <button
+        phx-click="force_unveil"
+        class="px-4 py-2 bg-indigo-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+      >
+        Force Unveil
+      </button>
+    <% end %>
   </section>
 </div>
 

@@ -4,11 +4,12 @@ defmodule MtgTreachery.Multiplayer do
   """
 
   import Ecto.Query, warn: false
+  alias MtgTreachery.LifeTotals
   alias Ecto.Changeset
   alias MtgTreachery.Repo
 
   alias MtgTreachery.Multiplayer.{Game, Player, Identity, IdentityPicker}
-  alias MtgTreachery.LifeTotals.{Cache, Server}
+  alias MtgTreachery.LifeTotals
 
   #
   # Game Functions
@@ -86,9 +87,6 @@ defmodule MtgTreachery.Multiplayer do
       |> Game.changeset(attrs)
       |> Repo.insert()
 
-    # start life total server for this game
-    Cache.server_process(game.id)
-
     {:ok, game}
   end
 
@@ -116,12 +114,7 @@ defmodule MtgTreachery.Multiplayer do
   def end_game(game) do
     {:ok, game} = update_game(game, %{status: :inactive})
 
-    shutdown_life_totals_server(game)
-  end
-
-  defp shutdown_life_totals_server(game) do
-    Cache.server_process(game.id)
-    |> Server.shutdown()
+    LifeTotals.shutdown(game.id)
   end
 
   @doc """
@@ -254,9 +247,7 @@ defmodule MtgTreachery.Multiplayer do
   def maybe_broadcast_new_player({:ok, player}, game) do
     Game.broadcast_game(game.id)
 
-    life_total_server = Cache.server_process(game.id)
-    Server.add_player(life_total_server, player.id)
-
+    LifeTotals.add_player(game.id, player.id)
     {:ok, player}
   end
 

@@ -15,7 +15,10 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
             <%!-- <li class={"#{Styling.role_background_color(player.identity.role)}"}> --%>
             <li class={other_player_wrapper_classes(@game, player, index)}>
               <div class="text-center h-full flex flex-col items-center justify-center">
-                <span><%= player.name %></span>
+                <.link navigate={~p"/player/#{player.id}"} class="underline">
+                  <span><%= player.name %></span>
+                </.link>
+
                 <%!-- testing button below, remove in prod --%>
                 <%!-- <button phx-click="unveil_player" phx-value-player={player.id}>Toggle Veil</button> --%>
                 <%= identity_text(player) %>
@@ -107,9 +110,7 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
     ~H"""
     <div class="flex flex-col">
       <span class="font-semibold"><%= @player.identity.role %></span>
-      <.link navigate={~p"/player/#{@player.id}"} class="underline">
-        <%= @player.identity.name %>
-      </.link>
+      <span><%= @player.identity.name %></span>
     </div>
     """
   end

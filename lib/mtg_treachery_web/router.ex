@@ -45,6 +45,7 @@ defmodule MtgTreacheryWeb.Router do
     live "/create", GameLive.Create, :new, container: {:div, class: "h-full"}
 
     live "/join", GameLive.Join, :join, container: {:div, class: "h-full"}
+    live "/join/:game_code", GameLive.Join, :join, container: {:div, class: "h-full"}
     live "/rejoin", GameLive.Join, :rejoin, container: {:div, class: "h-full"}
 
     live "/identities", IdentityLive.Index, :index, container: {:div, class: "h-full"}

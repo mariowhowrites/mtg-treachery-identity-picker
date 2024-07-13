@@ -50,5 +50,5 @@ liveSocket.connect()
 window.liveSocket = liveSocket
 
 window.addEventListener("phx:copy_game_code", event => {
-    navigator.clipboard.writeText(document.getElementById(event.detail.id).value)
+    navigator.clipboard.writeText(event.detail.url)
 })

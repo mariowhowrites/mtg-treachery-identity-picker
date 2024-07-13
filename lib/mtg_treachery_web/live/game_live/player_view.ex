@@ -77,6 +77,36 @@ defmodule MtgTreacheryWeb.GameLive.PlayerView do
     {:noreply, socket |> assign(:is_card_flipped, false)}
   end
 
+  def handle_event("force_unveil", _params, socket) when socket.assigns.current_player.creator do
+    Multiplayer.update_player(socket.assigns.selected_player, %{status: :unveiled})
+
+    {
+      :noreply,
+      socket
+      |> assign(:is_card_flipped, true)
+      |> put_flash(:info, "Player forced unveiled!")
+    }
+  end
+
+  def handle_event("force_unveil", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("force_peek", _unsigned_params, socket) when socket.assigns.current_player.creator do
+    is_peeking = !socket.assigns.is_peeking
+
+    {
+      :noreply,
+      socket
+      |> assign(:is_peeking, is_peeking)
+      |> assign(:is_card_flipped, determine_flip_status(socket, is_peeking))
+    }
+  end
+
+  def handle_event("force_peek", _params, socket) do
+    {:noreply, socket}
+  end
+
   def handle_event("leave_game", _params, socket) do
     Multiplayer.update_player(socket.assigns.current_player, %{status: :inactive})
 

@@ -31,8 +31,10 @@ defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
           >
             Peek
           </button>
-        <span class="text-sm">(look at card without unveiling)</span>
+          <span class="text-sm">(look at card without unveiling)</span>
         </div>
+        <% else %>
+          <p>Waiting for <%= @selected_player.name %> to unveil...</p>
         <% end %>
       </div>
       <div
@@ -52,7 +54,9 @@ defmodule MtgTreacheryWeb.IdentityLive.IdentityCard do
               <%= @selected_player.identity.role %>
             </div>
             <div class="px-2 rounded-sm mb-4 text-sm pt-2">
-              <div>Unveil cost: <%= @selected_player.identity.unveil_cost %></div>
+              <%= if @selected_player.identity.role != "Leader" do %>
+                <div>Unveil cost: <%= @selected_player.identity.unveil_cost %></div>
+              <% end %>
               <%= for paragraph <- String.split(@selected_player.identity.description, "\n") do %>
                 <p class="mt-1"><%= paragraph %></p>
               <% end %>

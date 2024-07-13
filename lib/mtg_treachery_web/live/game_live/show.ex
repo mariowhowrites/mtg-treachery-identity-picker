@@ -4,7 +4,7 @@ defmodule MtgTreacheryWeb.GameLive.Show do
   alias MtgTreacheryWeb.Styling
   alias MtgTreachery.Multiplayer
   alias MtgTreacheryWeb.GameLive.Panels.{LobbyPanel, IdentityPanel, SettingsPanel, PlayerPanel}
-  alias MtgTreachery.LifeTotals.{Cache, Server}
+  alias MtgTreachery.LifeTotals
 
   @impl true
   def mount(_params, session, socket) do
@@ -39,8 +39,7 @@ defmodule MtgTreacheryWeb.GameLive.Show do
 
   @impl true
   def handle_params(_params, _, socket) do
-    life_total_server = Cache.server_process(socket.assigns.game.id)
-    life_totals = Server.get(life_total_server)
+    life_totals = LifeTotals.get_life_totals_by_game_id(socket.assigns.game.id)
 
     {:noreply,
      socket
@@ -53,8 +52,10 @@ defmodule MtgTreacheryWeb.GameLive.Show do
     {
       :noreply,
       socket
-      |> push_event("copy_game_code", %{id: "game_code_input"})
-      |> put_flash(:info, "Copied!")
+      |> push_event("copy_game_code", %{
+        url: url(~p"/join/#{socket.assigns.game.game_code}")
+      })
+      |> put_flash(:info, "Invite URL Copied!")
     }
   end
 
@@ -88,18 +89,12 @@ defmodule MtgTreacheryWeb.GameLive.Show do
   end
 
   def handle_event("gain_life", %{"player-id" => player_id}, socket) do
-    life_total_server = Cache.server_process(socket.assigns.game.id)
-
-    Server.gain_life(life_total_server, player_id)
-
+    LifeTotals.gain_life(socket.assigns.game.id, player_id)
     {:noreply, socket}
   end
 
   def handle_event("lose_life", %{"player-id" => player_id}, socket) do
-    life_total_server = Cache.server_process(socket.assigns.game.id)
-
-    Server.lose_life(life_total_server, player_id)
-
+    LifeTotals.lose_life(socket.assigns.game.id, player_id)
     {:noreply, socket}
   end
 
