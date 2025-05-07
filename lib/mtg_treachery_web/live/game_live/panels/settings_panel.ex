@@ -16,8 +16,11 @@ defmodule MtgTreacheryWeb.GameLive.Panels.SettingsPanel do
         phx-submit="save"
       >
         <.input field={@form[:name]} label="Name" />
-        <%= if @current_player.identity != nil do %>
-        <.input field={@form[:identity_id]} type="select" label="Identity" options={identity_options(@identities)}/>
+        <%= if @current_player.identity_name != nil do %>
+          <div class="mt-4">
+            <h3 class="text-lg font-semibold">Your Identity</h3>
+            <p><%= @current_player.identity_role %> - <%= @current_player.identity_name %></p>
+          </div>
         <% end %>
         <:actions>
           <.button phx-disable-with="Saving...">Save</.button>
@@ -35,9 +38,9 @@ defmodule MtgTreacheryWeb.GameLive.Panels.SettingsPanel do
         </section>
       <% end %>
       <button
-          phx-click="leave_game"
-          class="px-4 mt-2 py-2 bg-red-700 text-white rounded-lg shadow-sm hover:shadow-lg"
-        >
+        phx-click="leave_game"
+        class="px-4 mt-2 py-2 bg-red-700 text-white rounded-lg shadow-sm hover:shadow-lg"
+      >
         Leave Game
       </button>
     </div>
@@ -72,6 +75,7 @@ defmodule MtgTreacheryWeb.GameLive.Panels.SettingsPanel do
     case Multiplayer.update_player_identity(socket.assigns.current_player, player_params) do
       {:ok, _game} ->
         {:noreply, socket |> push_patch(to: ~p"/game/identity")}
+
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_player_form(socket, changeset)}
     end
@@ -84,7 +88,8 @@ defmodule MtgTreacheryWeb.GameLive.Panels.SettingsPanel do
   end
 
   defp identity_options(identities) do
-    identities |> Enum.reduce([], fn (identity, acc) -> acc ++ ["#{identity.name}": identity.id] end)
+    identities
+    |> Enum.reduce([], fn identity, acc -> acc ++ ["#{identity.name}": identity.id] end)
   end
 
   defp assign_player_form(socket, %Ecto.Changeset{} = changeset) do

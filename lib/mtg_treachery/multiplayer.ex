@@ -4,6 +4,7 @@ defmodule MtgTreachery.Multiplayer do
   """
 
   import Ecto.Query, warn: false
+  alias MtgTreachery.Multiplayer
   alias MtgTreachery.LifeTotals
   alias Ecto.Changeset
   alias MtgTreachery.Repo
@@ -25,7 +26,7 @@ defmodule MtgTreachery.Multiplayer do
 
   """
   def list_games do
-    Repo.all(Game, preload: [players: :identity])
+    Repo.all(Game, preload: [:players])
   end
 
   @doc """
@@ -42,7 +43,7 @@ defmodule MtgTreachery.Multiplayer do
       ** (Ecto.NoResultsError)
 
   """
-  def get_game!(id), do: Repo.get!(Game, id) |> Repo.preload(players: [:identity])
+  def get_game!(id), do: Repo.get!(Game, id) |> Repo.preload(:players)
 
   # return the most recent game that inclues the user_uuid amongst players
   def get_game_by_user_uuid(user_uuid) do
@@ -52,7 +53,7 @@ defmodule MtgTreachery.Multiplayer do
         where: p.user_uuid == ^user_uuid,
         where: p.game_id == g.id,
         where: p.status != :inactive,
-        preload: [players: :identity],
+        preload: [:players],
         order_by: [desc: :inserted_at],
         limit: 1
       )
@@ -64,7 +65,7 @@ defmodule MtgTreachery.Multiplayer do
       from g in Game,
         where: g.id == ^game_id,
         join: players in assoc(g, :players),
-        preload: [players: {players, :identity}]
+        preload: [players: players]
     )
   end
 
@@ -181,8 +182,7 @@ defmodule MtgTreachery.Multiplayer do
       from(p in Player,
         where: p.user_uuid == ^user_uuid,
         order_by: [desc: :inserted_at],
-        limit: 1,
-        preload: :identity
+        limit: 1
       )
 
     Repo.one(player_query)
@@ -224,7 +224,7 @@ defmodule MtgTreachery.Multiplayer do
   end
 
   def get_player_by_id!(id),
-    do: Repo.get!(Player, id) |> Repo.preload([:identity, game: [:players]])
+    do: Repo.get!(Player, id) |> Repo.preload(game: [:players])
 
   #
   # Multiplayer Functions (interactions between players and games)
@@ -305,40 +305,38 @@ defmodule MtgTreachery.Multiplayer do
   end
 
   def list_identities() do
-    Repo.all(Identity)
+    Identity.all()
   end
 
   def import_all_identities() do
-    all_identities = Identity.all()
-
-    for identity_chunk <- Enum.chunk_every(all_identities, 10) do
-      Repo.insert_all(Identity, identity_chunk)
-    end
-
+    # This function is now a no-op since we're using JSON as the source of truth
     :ok
   end
 
   def assign_player_identity(player, identity) do
+    attrs = %{
+      identity_name: identity.name,
+      identity_role: identity.role,
+      identity_description: identity.description,
+      identity_unveil_cost: identity.unveil_cost,
+      identity_rarity: identity.rarity
+    }
+
+    # If the player is the Leader, automatically unveil them
+    attrs = if identity.role == "Leader", do: Map.put(attrs, :status, :unveiled), else: attrs
+
     player
-    |> Player.changeset(make_player_attrs(player, identity))
-    |> Changeset.put_assoc(:identity, identity)
+    |> Player.changeset(attrs)
     |> Repo.update()
-  end
-
-  defp make_player_attrs(_player, identity) when identity.role == "Leader" do
-    %{status: :unveiled}
-  end
-
-  defp make_player_attrs(_player, _identity) do
-    %{}
   end
 
   def maybe_join_game(%{game_code: game_code, user_uuid: user_uuid, name: name}) do
     possible_game = Repo.get_by(Game, game_code: game_code)
 
-    case possible_game do
-      nil -> {:error, :invalid_game_code}
-      game -> create_player(%{user_uuid: user_uuid, name: name}, game)
+    cond do
+      possible_game == nil -> {:error, :invalid_game_code}
+      Multiplayer.is_game_full(possible_game) -> {:error, :game_full}
+      true -> create_player(%{user_uuid: user_uuid, name: name}, possible_game)
     end
   end
 end

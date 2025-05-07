@@ -1,10 +1,7 @@
 defmodule MtgTreachery.Multiplayer.Identity do
   use Ecto.Schema
 
-  alias MtgTreachery.Airtable.Client
   alias MtgTreachery.Multiplayer.Player
-  # the cached json of all Treachery identities
-  @identities_path "data/identities.json"
 
   schema "identities" do
     field(:name, :string)
@@ -16,21 +13,26 @@ defmodule MtgTreachery.Multiplayer.Identity do
     has_many(:players, Player)
   end
 
-  def all() do
-    raw_identities =
-      case File.exists?(Application.app_dir(:mtg_treachery, "priv/configs/identities.json")) do
-        true -> Jason.decode!(File.read!(Application.app_dir(:mtg_treachery, "priv/configs/identities.json")))
-        false -> fetch_identities()
-      end
-
-    convert_raw_identities(raw_identities)
+  @doc """
+  Returns all available identities from the JSON configuration file.
+  The identities are cached in memory for better performance.
+  """
+  def all do
+    Application.get_env(:mtg_treachery, :identities) ||
+      load_identities()
   end
 
-  defp fetch_identities() do
-    identities = Client.get_identities()
+  @doc """
+  Loads identities from the JSON file and caches them in the application environment.
+  """
+  def load_identities do
+    identities =
+      Application.app_dir(:mtg_treachery, "priv/configs/identities.json")
+      |> File.read!()
+      |> Jason.decode!()
+      |> convert_raw_identities()
 
-    File.write!(@identities_path, Jason.encode!(identities))
-
+    Application.put_env(:mtg_treachery, :identities, identities)
     identities
   end
 

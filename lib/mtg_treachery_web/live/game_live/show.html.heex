@@ -51,7 +51,7 @@
                 <%= if @current_player.status == :unveiled do %>
                   <div class={[
                     "border-2 rounded-lg border-zinc-300 bg-back h-24 w-16",
-                    Styling.role_background(@current_player.identity.role)
+                    Styling.role_background(@current_player.identity_role)
                   ]} />
                 <% end %>
               <% end %>

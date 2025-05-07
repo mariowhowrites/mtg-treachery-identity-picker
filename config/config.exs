@@ -10,6 +10,13 @@ import Config
 config :mtg_treachery,
   ecto_repos: [MtgTreachery.Repo]
 
+# Configure Finch
+config :mtg_treachery, :finch,
+  name: MtgTreachery.Finch,
+  pools: %{
+    default: [size: 10]
+  }
+
 # Configures the endpoint
 config :mtg_treachery, MtgTreacheryWeb.Endpoint,
   url: [host: "localhost"],

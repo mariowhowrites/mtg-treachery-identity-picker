@@ -21,10 +21,10 @@ defmodule MtgTreacheryWeb.GameLive.Panels.IdentityPanel do
   end
 
   def update(assigns, socket) do
-    {:ok, socket
-    |> assign(assigns)
-    |> assign(:is_card_flipped, determine_flip_status(assigns))
-  }
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(:is_card_flipped, determine_flip_status(assigns))}
   end
 
   def handle_event("peek", _unsigned_params, socket) do

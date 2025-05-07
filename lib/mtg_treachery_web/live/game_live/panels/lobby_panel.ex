@@ -77,7 +77,7 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
       class_list,
       case player.status do
         :veiled -> "bg-gray-700"
-        _ -> Styling.role_background_color(player.identity.role)
+        _ -> Styling.role_background_color(player.identity_role)
       end
     ]
   end
@@ -96,22 +96,15 @@ defmodule MtgTreacheryWeb.GameLive.Panels.LobbyPanel do
     |> trunc()
   end
 
-  def identity_text(player) when player.identity == nil do
-    nil
+  def identity_text(player) when player.identity_name == nil do
+    "Waiting for game to start..."
   end
 
-  def identity_text(player) when player.identity != nil and player.status == :veiled do
+  def identity_text(player) when player.identity_name != nil and player.status == :veiled do
     "Veiled"
   end
 
-  def identity_text(player) when player.identity != nil and player.status != :veiled do
-    assigns = %{player: player}
-
-    ~H"""
-    <div class="flex flex-col">
-      <span class="font-semibold"><%= @player.identity.role %></span>
-      <span><%= @player.identity.name %></span>
-    </div>
-    """
+  def identity_text(player) when player.identity_name != nil and player.status != :veiled do
+    "#{player.identity_role} - #{player.identity_name}"
   end
 end
